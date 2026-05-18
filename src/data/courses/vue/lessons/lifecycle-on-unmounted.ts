@@ -50,7 +50,8 @@ onUnmounted(() => {
       body: `Composables encapsulam lógica + lifecycle.
 useMousePosition, useEventListener etc registram listeners no setup e os limpam em onUnmounted.
 O usuário do composable não precisa pensar em cleanup.`,
-      code: `// composables/useMousePosition.ts
+      code: `<script setup>
+// composables/useMousePosition.ts
 import { onMounted, onUnmounted, ref } from 'vue'
 
 export function useMousePosition() {
@@ -66,7 +67,8 @@ export function useMousePosition() {
   onUnmounted(() => window.removeEventListener('mousemove', update))
 
   return { x, y }
-}`,
+}
+</script>`,
     },
     {
       tag: 'unmounted-state-gone',
@@ -74,7 +76,8 @@ export function useMousePosition() {
       body: `Refs e DOM já podem ter sido limpos em onUnmounted.
 Se você precisa do estado atual, use onBeforeUnmount.
 Se só precisa "soltar recurso externo" (timer, listener, ws), onUnmounted resolve.`,
-      code: `// ❌ pode pegar valor stale
+      code: `<script setup>
+// ❌ pode pegar valor stale
 onUnmounted(() => {
   localStorage.setItem('valor', valor.value)
 })
@@ -82,7 +85,8 @@ onUnmounted(() => {
 // ✅ leitura segura
 onBeforeUnmount(() => {
   localStorage.setItem('valor', valor.value)
-})`,
+})
+</script>`,
     },
   ],
 

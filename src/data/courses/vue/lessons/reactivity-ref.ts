@@ -94,8 +94,10 @@ function certo() {
       front: 'O que ref() retorna?',
       back: `Um objeto ref reativo e mutável.
 O valor fica em .value; leituras e escritas são rastreadas.`,
-      code: `const count = ref(0)
-// count.value === 0`,
+      code: `<script setup>
+const count = ref(0)
+// count.value === 0
+</script>`,
       requires: ['ref-value'],
     },
     {
@@ -103,8 +105,10 @@ O valor fica em .value; leituras e escritas são rastreadas.`,
       front: 'Quando usar .value?',
       back: `Sempre no script para ler ou alterar o valor.
 No template, Vue desembrulha automaticamente.`,
-      code: `// script: count.value++
-// template: {{ count }}`,
+      code: `<script setup>
+// script: count.value++
+// template: {{ count }}
+</script>`,
       requires: ['ref-dot-value'],
     },
     {
@@ -112,8 +116,10 @@ No template, Vue desembrulha automaticamente.`,
       front: 'Como ref() trata objetos e arrays?',
       back: `Vue envolve em um proxy reativo (reactive() interno).
 Propriedades aninhadas são rastreadas automaticamente.`,
-      code: `const user = ref({ nome: 'Ana' })
-user.value.nome = 'Bruno'   // rastreado`,
+      code: `<script setup>
+const user = ref({ nome: 'Ana' })
+user.value.nome = 'Bruno'   // rastreado
+</script>`,
       requires: ['ref-objects'],
     },
     {
@@ -121,8 +127,10 @@ user.value.nome = 'Bruno'   // rastreado`,
       front: 'Por que reatribuir a variável quebra a reatividade?',
       back: `A reatribuição substitui a Ref original por outro valor.
 O template observa a Ref antiga, que ninguém atualiza — re-renders param.`,
-      code: `// ❌ count = 5
-// ✅ count.value = 5`,
+      code: `<script setup>
+// ❌ count = 5
+// ✅ count.value = 5
+</script>`,
       requires: ['ref-pitfall'],
     },
   ],

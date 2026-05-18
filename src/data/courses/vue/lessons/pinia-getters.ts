@@ -16,7 +16,8 @@ const piniaGettersLesson: Lesson = {
       body: `Getters são valores derivados do state, com cache.
 No setup-store, são exatamente computed() retornados no return.
 Re-calculam só quando uma dependência reativa muda.`,
-      code: `export const useCarrinho = defineStore('carrinho', () => {
+      code: `<script setup>
+export const useCarrinho = defineStore('carrinho', () => {
   const itens = ref([
     { id: 1, preco: 10 },
     { id: 2, preco: 25 },
@@ -25,7 +26,8 @@ Re-calculam só quando uma dependência reativa muda.`,
   const total = computed(() => itens.value.reduce((s, i) => s + i.preco, 0))
 
   return { itens, total }
-})`,
+})
+</script>`,
     },
     {
       tag: 'pinia-getters-uso',
@@ -51,7 +53,8 @@ const { total } = storeToRefs(carrinho)
       body: `Computed não aceita parâmetro diretamente.
 Pra ter "getter parametrizado", retorne uma função.
 Ela não é cacheada por argumento — re-executa toda chamada.`,
-      code: `export const useItens = defineStore('itens', () => {
+      code: `<script setup>
+export const useItens = defineStore('itens', () => {
   const lista = ref([
     { id: 1, nome: 'A' },
     { id: 2, nome: 'B' },
@@ -64,14 +67,16 @@ Ela não é cacheada por argumento — re-executa toda chamada.`,
   return { lista, porId }
 })
 
-// uso: carrinho.porId(2)`,
+// uso: carrinho.porId(2)
+</script>`,
     },
     {
       tag: 'pinia-getters-cross',
       title: 'Getter usando outro getter / outro store',
       body: `No setup-store, getter é só uma função pura.
 Pode usar outros computeds do mesmo store ou de outros (chamando useOutroStore()).`,
-      code: `export const usePagamento = defineStore('pagamento', () => {
+      code: `<script setup>
+export const usePagamento = defineStore('pagamento', () => {
   const carrinho = useCarrinho()
   const desconto = ref(0.1)
 
@@ -80,7 +85,8 @@ Pode usar outros computeds do mesmo store ou de outros (chamando useOutroStore()
   )
 
   return { desconto, totalComDesconto }
-})`,
+})
+</script>`,
     },
   ],
 
@@ -101,7 +107,9 @@ Pode usar outros computeds do mesmo store ou de outros (chamando useOutroStore()
       id: 'vue/pinia/getters/fc-3',
       front: 'Como criar getter com parâmetro?',
       back: 'Retorne uma função do computed. Trade-off: cada chamada re-executa (sem cache por arg).',
-      code: `const porId = computed(() => (id) => lista.value.find(...))`,
+      code: `<script setup>
+const porId = computed(() => (id) => lista.value.find(...))
+</script>`,
       requires: ['pinia-getters-params'],
     },
     {

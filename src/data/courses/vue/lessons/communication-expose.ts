@@ -16,7 +16,8 @@ const exposeLesson: Lesson = {
       body: `<script setup> é fechado por padrão: nada é exposto pra fora.
 Se o pai pegar uma ref do componente filho, não consegue ver as variáveis/métodos internos.
 defineExpose abre seletivamente o que deve ser acessível externamente.`,
-      code: `<!-- Filho.vue (sem expose) -->
+      code: `<script setup>
+<!-- Filho.vue (sem expose) -->
 <script setup>
 import { ref } from 'vue'
 const valor = ref(0)
@@ -26,14 +27,16 @@ function inc() { valor.value++ }
 <!-- Pai.vue -->
 <Filho ref="filho" />
 filho.valor   // undefined — fechado!
-filho.inc()   // undefined`,
+filho.inc()   // undefined
+</script>`,
     },
     {
       tag: 'expose-basic',
       title: 'defineExpose({ ... })',
       body: `defineExpose recebe um objeto com o que deve ficar público.
 Refs continuam reativos lá fora, e métodos podem ser chamados via template ref.`,
-      code: `<!-- Filho.vue -->
+      code: `<script setup>
+<!-- Filho.vue -->
 <script setup>
 import { ref } from 'vue'
 const valor = ref(0)
@@ -50,6 +53,7 @@ function disparar() {
   filho.value.inc()
   console.log(filho.value.valor)
 }
+</script>
 </script>`,
     },
     {
@@ -57,7 +61,8 @@ function disparar() {
       title: 'Tipando o expose em TS',
       body: `Combinado com defineExpose, você pode declarar o tipo do que está sendo exposto
 pra autocomplete no pai. Use ComponentExposed<T> ou InstanceType<typeof Filho>.`,
-      code: `<!-- Filho.vue -->
+      code: `<script setup>
+<!-- Filho.vue -->
 <script setup lang="ts">
 import { ref } from 'vue'
 const valor = ref(0)
@@ -71,6 +76,7 @@ import { ref } from 'vue'
 import type Filho from './Filho.vue'
 const filhoRef = ref<InstanceType<typeof Filho> | null>(null)
 filhoRef.value?.inc()  // tipado
+</script>
 </script>`,
     },
     {
@@ -80,12 +86,14 @@ filhoRef.value?.inc()  // tipado
 Prefira eventos (emit) e props pra comunicação. Use expose só pra:
 - imperativo de UI (focus, scrollIntoView, abrir modal)
 - métodos que não combinam com fluxo declarativo`,
-      code: `<!-- exemplos legítimos -->
+      code: `<script setup>
+<!-- exemplos legítimos -->
 <MeuInput ref="input" />
 input.value.focus()
 
 <MeuModal ref="modal" />
-modal.value.abrir()`,
+modal.value.abrir()
+</script>`,
     },
   ],
 

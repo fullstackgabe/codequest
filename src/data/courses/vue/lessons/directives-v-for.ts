@@ -59,13 +59,15 @@ A key vai no <template>.`,
       title: 'v-for + v-if: evite no mesmo elemento',
       body: `Em Vue 3, v-if tem prioridade maior que v-for no mesmo elemento — você acaba referenciando uma variável que ainda não existe.
 Solução: envolva em <template v-for> e ponha v-if no filho.`,
-      code: `<!-- ❌ ruim -->
+      code: `<script setup>
+<!-- ❌ ruim -->
 <li v-for="x in itens" v-if="x.ativo">{{ x.nome }}</li>
 
 <!-- ✅ -->
 <template v-for="x in itens" :key="x.id">
   <li v-if="x.ativo">{{ x.nome }}</li>
-</template>`,
+</template>
+</script>`,
     },
   ],
 

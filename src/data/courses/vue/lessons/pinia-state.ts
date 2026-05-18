@@ -17,14 +17,16 @@ const piniaStateLesson: Lesson = {
 ID único identifica o store globalmente.
 Há duas formas: Options API (objeto com state/getters/actions) e Setup API (função).
 Setup é mais flexível e combina com a Composition API.`,
-      code: `// stores/contador.ts
+      code: `<script setup>
+// stores/contador.ts
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useContador = defineStore('contador', () => {
   const valor = ref(0)
   return { valor }
-})`,
+})
+</script>`,
     },
     {
       tag: 'pinia-state-refs',
@@ -32,11 +34,13 @@ export const useContador = defineStore('contador', () => {
       body: `No setup-store, o "state" é qualquer ref/reactive declarado dentro.
 Tudo que você retornar do setup vira parte do store público.
 Use ref pra primitivos e reactive pra objetos — exatamente como num componente.`,
-      code: `export const useUsuario = defineStore('usuario', () => {
+      code: `<script setup>
+export const useUsuario = defineStore('usuario', () => {
   const nome = ref('')
   const perfil = reactive({ tema: 'dark', idioma: 'pt-BR' })
   return { nome, perfil }
-})`,
+})
+</script>`,
     },
     {
       tag: 'pinia-usar-componente',

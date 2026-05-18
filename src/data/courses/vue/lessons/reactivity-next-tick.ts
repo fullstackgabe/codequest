@@ -96,9 +96,11 @@ Isso evita renders desperdiçados quando várias mutações acontecem juntas.`,
       id: 'vue/reactivity/next-tick/fc-2',
       front: 'O que `await nextTick()` faz?',
       back: 'Espera o ciclo de render terminar — o DOM já estará atualizado quando a Promise resolver.',
-      code: `state.value = novo
+      code: `<script setup>
+state.value = novo
 await nextTick()
-// DOM atualizado aqui`,
+// DOM atualizado aqui
+</script>`,
       requires: ['nt-await'],
     },
     {

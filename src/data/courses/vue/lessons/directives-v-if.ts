@@ -51,11 +51,13 @@ A tag <template> não aparece no DOM — só serve como agrupador lógico.`,
 Use v-if quando a condição muda pouco (raramente), ou quando o conteúdo é caro
 de manter no DOM.
 Se alterna muito (toggle frequente), prefira v-show.`,
-      code: `<!-- toggle frequente: v-show é mais barato -->
+      code: `<script setup>
+<!-- toggle frequente: v-show é mais barato -->
 <div v-show="aberto">…</div>
 
 <!-- página inteira em outro estado: v-if -->
-<AdminPanel v-if="usuario.admin" />`,
+<AdminPanel v-if="usuario.admin" />
+</script>`,
     },
   ],
 
@@ -70,9 +72,11 @@ Se alterna muito (toggle frequente), prefira v-show.`,
       id: 'vue/directives/v-if/fc-2',
       front: 'Como encadear várias condições?',
       back: 'Use v-else-if e v-else imediatamente após o v-if no mesmo pai.',
-      code: `<p v-if="a">A</p>
+      code: `<script setup>
+<p v-if="a">A</p>
 <p v-else-if="b">B</p>
-<p v-else>nenhum</p>`,
+<p v-else>nenhum</p>
+</script>`,
       requires: ['v-if-else'],
     },
     {

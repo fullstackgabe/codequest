@@ -147,15 +147,28 @@ const nextLessonInModule = computed(() => {
   return mod.lessons[idx + 1] ?? null
 })
 
-// Inside the lesson, only "Próximo challenge →" advances. End-of-lesson navigation
-// (review, next lesson, back to modules) lives in the completion panel below.
+// Stays scoped to the current lesson. Navigation to the next lesson lives in
+// the celebration modal — once dismissed, the user goes via the header.
 const nextLabel = computed<string | null>(() =>
-  hasNextChallenge.value ? 'Próximo challenge →' : null,
+  hasNextChallenge.value ? 'Próximo' : null,
 )
+
+// "Anterior" only makes sense for browsing back through a fully-completed lesson.
+// During first-time solving we keep the focus linear on the current challenge.
+const prevLabel = computed<string | null>(() => {
+  if (!allChallengesComplete.value) return null
+  return activeChallengeIndex.value > 0 ? 'Anterior' : null
+})
 
 function goNext(): void {
   if (hasNextChallenge.value) {
     activeChallengeIndex.value += 1
+  }
+}
+
+function goPrevChallenge(): void {
+  if (activeChallengeIndex.value > 0) {
+    activeChallengeIndex.value -= 1
   }
 }
 
@@ -274,11 +287,12 @@ function switchTab(tab: Tab): void {
             <ChallengeRunner
               :challenge="activeChallenge"
               :complete="isChallengeComplete(activeChallenge.id)"
+              :prev-label="prevLabel ?? undefined"
               :next-label="nextLabel ?? undefined"
               @complete="onChallengeComplete"
               @next="goNext"
+              @prev="goPrevChallenge"
             />
-
           </template>
         </section>
       </template>

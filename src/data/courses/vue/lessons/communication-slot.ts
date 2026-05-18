@@ -16,7 +16,8 @@ const slotLesson: Lesson = {
       body: `O filho declara onde o conteúdo vai com <slot />.
 O pai escreve o conteúdo entre as tags do filho.
 É herança de UI (não de dados) — o filho "abre uma janela" pro pai pintar.`,
-      code: `<!-- Card.vue -->
+      code: `<script setup>
+<!-- Card.vue -->
 <template>
   <div class="card">
     <slot />
@@ -27,7 +28,8 @@ O pai escreve o conteúdo entre as tags do filho.
 <Card>
   <h1>Título</h1>
   <p>Qualquer HTML aqui</p>
-</Card>`,
+</Card>
+</script>`,
     },
     {
       tag: 'slot-named',
@@ -35,7 +37,8 @@ O pai escreve o conteúdo entre as tags do filho.
       body: `Filho expõe vários "buracos" nomeados; pai preenche um a um com <template #nome>.
 Slot sem nome é chamado de "default" (#default).
 Útil pra componentes com cabeçalho/corpo/rodapé.`,
-      code: `<!-- Card.vue -->
+      code: `<script setup>
+<!-- Card.vue -->
 <template>
   <div class="card">
     <header><slot name="header" /></header>
@@ -49,21 +52,24 @@ Slot sem nome é chamado de "default" (#default).
   <template #header>Topo</template>
   Conteúdo principal
   <template #footer>Rodapé</template>
-</Card>`,
+</Card>
+</script>`,
     },
     {
       tag: 'slot-fallback',
       title: 'Conteúdo fallback',
       body: `O que está dentro de <slot>...</slot> é o conteúdo padrão.
 Aparece quando o pai não preencher esse slot.`,
-      code: `<!-- Botao.vue -->
+      code: `<script setup>
+<!-- Botao.vue -->
 <template>
   <button><slot>OK</slot></button>
 </template>
 
 <!-- Uso -->
 <Botao />           <!-- mostra "OK" -->
-<Botao>Salvar</Botao>  <!-- mostra "Salvar" -->`,
+<Botao>Salvar</Botao>  <!-- mostra "Salvar" -->
+</script>`,
     },
     {
       tag: 'slot-scoped',
@@ -71,7 +77,8 @@ Aparece quando o pai não preencher esse slot.`,
       body: `Filho pode expor dados do seu estado pro slot via atributos no <slot>.
 Pai recebe via v-slot="x" (ou shorthand "#default="x"").
 Padrão pra componentes de lista: o filho itera, o pai define como renderizar cada item.`,
-      code: `<!-- Lista.vue -->
+      code: `<script setup>
+<!-- Lista.vue -->
 <template>
   <ul>
     <li v-for="item in itens" :key="item.id">
@@ -85,7 +92,8 @@ Padrão pra componentes de lista: o filho itera, o pai define como renderizar ca
   <template #default="{ item }">
     <strong>{{ item.nome }}</strong> — {{ item.idade }}
   </template>
-</Lista>`,
+</Lista>
+</script>`,
     },
   ],
 
@@ -106,7 +114,9 @@ Padrão pra componentes de lista: o filho itera, o pai define como renderizar ca
       id: 'vue/communication/slot/fc-3',
       front: 'Como definir um fallback de slot?',
       back: 'O conteúdo dentro de <slot>...</slot> é o default quando o pai não preenche.',
-      code: `<slot>Conteúdo padrão</slot>`,
+      code: `<script setup>
+<slot>Conteúdo padrão</slot>
+</script>`,
       requires: ['slot-fallback'],
     },
     {

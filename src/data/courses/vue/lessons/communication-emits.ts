@@ -16,7 +16,8 @@ const emitsLesson: Lesson = {
       body: `Componentes filhos comunicam o pai emitindo eventos.
 defineEmits declara quais eventos o componente dispara.
 emit(nome, payload) envia o evento; o pai ouve com @nome.`,
-      code: `<!-- Filho.vue -->
+      code: `<script setup>
+<!-- Filho.vue -->
 <script setup>
 const emit = defineEmits(['fechar'])
 function fechar() {
@@ -27,14 +28,16 @@ function fechar() {
 <!-- Pai.vue -->
 <template>
   <Filho @fechar="aberto = false" />
-</template>`,
+</template>
+</script>`,
     },
     {
       tag: 'emit-payload',
       title: 'Emitindo com payload',
       body: `O segundo argumento (e seguintes) de emit() vira o(s) parâmetro(s) do handler no pai.
 Use pra mandar dados — id do item clicado, novo valor, etc.`,
-      code: `<!-- Filho.vue -->
+      code: `<script setup>
+<!-- Filho.vue -->
 <script setup>
 const emit = defineEmits(['selecionar'])
 function escolher(id) {
@@ -45,7 +48,8 @@ function escolher(id) {
 <!-- Pai.vue -->
 <template>
   <Lista @selecionar="(id) => idAtual = id" />
-</template>`,
+</template>
+</script>`,
     },
     {
       tag: 'emit-typed',
@@ -66,7 +70,8 @@ const emit = defineEmits<{
 - Quebra rastreabilidade ("quem mudou esse dado?")
 - Avisa em DEV e pode ser sobrescrito no próximo render
 emit mantém o pai como dono do dado — ele decide se aceita.`,
-      code: `<!-- ❌ ruim: muta prop -->
+      code: `<script setup>
+<!-- ❌ ruim: muta prop -->
 <script setup>
 const props = defineProps(['valor'])
 function inc() { props.valor++ }
@@ -77,6 +82,7 @@ function inc() { props.valor++ }
 defineProps(['valor'])
 const emit = defineEmits(['update:valor'])
 function inc() { emit('update:valor', props.valor + 1) }
+</script>
 </script>`,
     },
   ],
@@ -92,8 +98,10 @@ function inc() { emit('update:valor', props.valor + 1) }
       id: 'vue/communication/emits/fc-2',
       front: 'Como mandar dados junto do evento?',
       back: 'emit(nome, payload). O handler no pai recebe payload como argumento.',
-      code: `emit('selecionar', id)
-// pai: @selecionar="(id) => ..."`,
+      code: `<script setup>
+emit('selecionar', id)
+// pai: @selecionar="(id) => ..."
+</script>`,
       requires: ['emit-payload'],
     },
     {

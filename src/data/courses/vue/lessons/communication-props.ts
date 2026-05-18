@@ -16,7 +16,8 @@ const propsLesson: Lesson = {
       body: `Pais passam dados pra filhos via props.
 defineProps declara o contrato. No <script setup>, retorna um objeto reativo com as props.
 No template, use direto como variável.`,
-      code: `<!-- Filho.vue -->
+      code: `<script setup>
+<!-- Filho.vue -->
 <script setup>
 const props = defineProps(['nome', 'idade'])
 console.log(props.nome)
@@ -27,7 +28,8 @@ console.log(props.nome)
 </template>
 
 <!-- Pai.vue -->
-<Filho nome="Ana" :idade="30" />`,
+<Filho nome="Ana" :idade="30" />
+</script>`,
     },
     {
       tag: 'props-types',
@@ -88,9 +90,11 @@ watch(() => props.inicial, (n) => { valor.value = n })
       id: 'vue/communication/props/fc-2',
       front: 'Como declarar prop com valor default em JS?',
       back: 'defineProps({ idade: { type: Number, default: 0 } }).',
-      code: `defineProps({
+      code: `<script setup>
+defineProps({
   idade: { type: Number, default: 0 }
-})`,
+})
+</script>`,
       requires: ['props-types'],
     },
     {

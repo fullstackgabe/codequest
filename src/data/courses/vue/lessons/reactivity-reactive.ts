@@ -32,12 +32,14 @@ usuario.nivel = 2           // ✅ rastreado
 Para primitivos, use ref().
 Regra prática: ref() funciona pra tudo; reactive() é uma alternativa
 ergonômica quando o estado é só um objeto/array.`,
-      code: `import { reactive, ref } from 'vue'
+      code: `<script setup>
+import { reactive, ref } from 'vue'
 
 const count = reactive(0)        // ❌ aviso em DEV — primitivo
 const count2 = ref(0)            // ✅
 const state = reactive({ x: 0 }) // ✅
-const state2 = ref({ x: 0 })     // ✅ também funciona`,
+const state2 = ref({ x: 0 })     // ✅ também funciona
+</script>`,
     },
     {
       tag: 'reactive-destructure',
@@ -86,8 +88,10 @@ Object.assign(state, { x: 3 })
       id: 'vue/reactivity/reactive/fc-1',
       front: 'O que reactive() retorna?',
       back: 'Um proxy reativo do objeto/array passado. Acessos e mutações em propriedades são rastreados sem precisar de .value.',
-      code: `const state = reactive({ x: 1 })
-state.x++  // rastreado`,
+      code: `<script setup>
+const state = reactive({ x: 1 })
+state.x++  // rastreado
+</script>`,
       requires: ['reactive-object'],
     },
     {
@@ -102,8 +106,10 @@ Para primitivos, use ref(), que cria um wrapper com .value.`,
       front: 'Como desestruturar um objeto reativo sem perder reatividade?',
       back: `Use toRefs(): converte cada propriedade em um Ref individual,
 que mantém a ligação com o proxy original.`,
-      code: `const { x, y } = toRefs(state)
-// x e y são Refs — atualizam state.x / state.y`,
+      code: `<script setup>
+const { x, y } = toRefs(state)
+// x e y são Refs — atualizam state.x / state.y
+</script>`,
       requires: ['reactive-destructure'],
     },
     {

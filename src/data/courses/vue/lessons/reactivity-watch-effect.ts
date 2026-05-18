@@ -35,7 +35,8 @@ watchEffect(() => {
       body: `watchEffect não dá novo/antigo — só executa o efeito.
 Se precisar do valor antigo, use watch.
 Regra geral: watch quando precisa do antigo; watchEffect quando só importa "rodar o efeito quando algo mudar".`,
-      code: `// watchEffect: sem (novo, antigo)
+      code: `<script setup>
+// watchEffect: sem (novo, antigo)
 watchEffect(() => {
   log(state.x)
 })
@@ -43,7 +44,8 @@ watchEffect(() => {
 // watch: com (novo, antigo)
 watch(() => state.x, (novo, antigo) => {
   log(antigo, '->', novo)
-})`,
+})
+</script>`,
     },
     {
       tag: 'wfx-cleanup',
@@ -106,10 +108,12 @@ Use watch quando precisa do valor antigo.`,
       front: 'Para que serve `onCleanup` dentro de watchEffect?',
       back: `Cancelar recursos da execução anterior (fetch pendente, timer, listener)
 antes da próxima rodada ou do unmount.`,
-      code: `watchEffect((onCleanup) => {
+      code: `<script setup>
+watchEffect((onCleanup) => {
   const t = setTimeout(...)
   onCleanup(() => clearTimeout(t))
-})`,
+})
+</script>`,
       requires: ['wfx-cleanup'],
     },
     {

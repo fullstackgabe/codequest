@@ -56,7 +56,8 @@ const nome = ref('')
       body: `Pra um componente aceitar v-model, ele declara prop modelValue + emit 'update:modelValue'.
 Vue mapeia v-model="x" automaticamente.
 Múltiplos v-model: use argumento — v-model:nome="..." mapeia pra :nome e @update:nome.`,
-      code: `<!-- pai -->
+      code: `<script setup>
+<!-- pai -->
 <MeuInput v-model="texto" />
 
 <!-- filho (MeuInput.vue) -->
@@ -69,7 +70,8 @@ const emit = defineEmits(['update:modelValue'])
     :value="modelValue"
     @input="emit('update:modelValue', $event.target.value)"
   />
-</template>`,
+</template>
+</script>`,
     },
   ],
 

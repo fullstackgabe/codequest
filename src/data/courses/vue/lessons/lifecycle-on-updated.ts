@@ -37,11 +37,13 @@ onUpdated(() => {
 onUpdated reage a qualquer re-render — pode disparar por coisas alheias.
 Prefira watch se você sabe qual variável quer observar; use onUpdated só pra ler o DOM
 após mudanças (ex: medir altura depois de inserir conteúdo).`,
-      code: `// melhor: watch específico
+      code: `<script setup>
+// melhor: watch específico
 watch(valor, (n) => log(n))
 
 // onUpdated: dispara em qualquer re-render
-onUpdated(() => log(valor.value, outraVar.value))`,
+onUpdated(() => log(valor.value, outraVar.value))
+</script>`,
     },
     {
       tag: 'updated-no-mutation',
@@ -49,7 +51,8 @@ onUpdated(() => log(valor.value, outraVar.value))`,
       body: `Mudar refs dentro de onUpdated pode causar loop infinito de re-renders.
 Se precisar derivar valor, use computed.
 Se precisar reagir a uma mudança, use watch.`,
-      code: `// ❌ pode causar loop infinito
+      code: `<script setup>
+// ❌ pode causar loop infinito
 onUpdated(() => {
   contador.value++
 })
@@ -60,7 +63,8 @@ onUpdated(() => {
     jaFeito.value = true
     contador.value++
   }
-})`,
+})
+</script>`,
     },
     {
       tag: 'updated-dom-read',

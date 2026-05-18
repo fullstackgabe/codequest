@@ -89,7 +89,9 @@ watch([x, y], ([nx, ny], [ox, oy]) => {
       id: 'vue/reactivity/watch/fc-2',
       front: 'O que faz a opção `immediate: true`?',
       back: 'Roda o callback uma vez logo no setup, antes de qualquer mudança real.',
-      code: `watch(src, cb, { immediate: true })`,
+      code: `<script setup>
+watch(src, cb, { immediate: true })
+</script>`,
       requires: ['watch-immediate'],
     },
     {

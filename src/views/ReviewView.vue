@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, toRef } from 'vue'
+import { computed, ref, toRef } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { useSRSStore } from '@/stores/srs'
 import { useCourse } from '@/composables/useCourse'
@@ -12,14 +12,42 @@ const courseId = toRef(() => String(route.params.courseId ?? ''))
 const { course, notFound } = useCourse(courseId)
 const srs = useSRSStore()
 
-// useReviewSession is initialised once per view mount: building a new
-// snapshot when the user navigates here is the intended UX.
 const session = useReviewSession(courseId.value)
 
 const due = computed(() => srs.dueCount(courseId.value))
 
+interface RateToast {
+  // Unique id forces Vue to remount the toast element so the animation replays
+  // even when the same tone fires twice in a row.
+  id: number
+  text: string
+  tone: 'perfect' | 'good' | 'ok' | 'fail'
+}
+
+const toast = ref<RateToast | null>(null)
+let toastTimer: ReturnType<typeof setTimeout> | null = null
+let toastSeq = 0
+
+function showToast(quality: SRSQuality): void {
+  const next: RateToast =
+    quality === 5
+      ? { id: ++toastSeq, text: '+15 XP · Perfeito!', tone: 'perfect' }
+      : quality === 4
+        ? { id: ++toastSeq, text: '+10 XP · Boa!', tone: 'good' }
+        : quality === 3
+          ? { id: ++toastSeq, text: '+5 XP · Acertou', tone: 'ok' }
+          : { id: ++toastSeq, text: 'Vai voltar a aparecer', tone: 'fail' }
+
+  toast.value = next
+  if (toastTimer !== null) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => {
+    toast.value = null
+  }, 1400)
+}
+
 function onRated(payload: { cardId: string; quality: SRSQuality }): void {
   session.rate(payload.quality)
+  showToast(payload.quality)
 }
 </script>
 
@@ -75,17 +103,9 @@ function onRated(payload: { cardId: string; quality: SRSQuality }): void {
             >
           </div>
           <div class="review-summary__actions">
-            <button
-              type="button"
-              class="btn btn-primary"
-              :disabled="due === 0"
-              @click="session.restart()"
-            >
-              Nova sessão
-            </button>
             <RouterLink
               :to="`/course/${courseId}`"
-              class="btn btn-secondary"
+              class="btn btn-primary"
             >
               Voltar ao curso
             </RouterLink>
@@ -101,6 +121,18 @@ function onRated(payload: { cardId: string; quality: SRSQuality }): void {
         </section>
       </template>
     </div>
+
+    <Transition name="rate-toast">
+      <div
+        v-if="toast"
+        :key="toast.id"
+        class="rate-toast"
+        :class="`rate-toast--${toast.tone}`"
+        role="status"
+      >
+        {{ toast.text }}
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -169,5 +201,51 @@ function onRated(payload: { cardId: string; quality: SRSQuality }): void {
 .not-found {
   text-align: center;
   padding: 2rem 0;
+}
+
+.rate-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 2.5rem;
+  transform: translateX(-50%);
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  z-index: 1100;
+  pointer-events: none;
+  box-shadow: var(--shadow);
+}
+
+.rate-toast--perfect {
+  background: rgba(16, 185, 129, 0.95);
+  color: #0f0f1a;
+}
+.rate-toast--good {
+  background: rgba(251, 191, 36, 0.95);
+  color: #0f0f1a;
+}
+.rate-toast--ok {
+  background: rgba(56, 189, 248, 0.95);
+  color: #0f0f1a;
+}
+.rate-toast--fail {
+  background: rgba(239, 68, 68, 0.95);
+  color: #fff;
+}
+
+.rate-toast-enter-active,
+.rate-toast-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rate-toast-enter-from {
+  opacity: 0;
+  transform: translate(-50%, 18px);
+}
+.rate-toast-leave-to {
+  opacity: 0;
+  transform: translate(-50%, -8px);
 }
 </style>

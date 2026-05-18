@@ -26,37 +26,43 @@ Listeners e estado interno do componente são preservados durante o toggle.`,
       body: `v-show: custo inicial maior (renderiza no mount) + toggle barato.
 v-if: custo inicial baixo se condição é false + toggle caro (cria/destrói).
 Regra: alterna muito → v-show. Alterna pouco → v-if.`,
-      code: `<!-- toggle frequente: -->
+      code: `<script setup>
+<!-- toggle frequente: -->
 <DropdownMenu v-show="aberto" />
 
 <!-- raramente exibido: -->
-<AdminPanel v-if="usuario.admin" />`,
+<AdminPanel v-if="usuario.admin" />
+</script>`,
     },
     {
       tag: 'v-show-no-template',
       title: 'Limitação: não funciona em <template>',
       body: `v-show só funciona em elementos reais.
 Não use em <template>; <template v-show> é inválido — use v-if ou aplique nos filhos.`,
-      code: `<!-- ❌ inválido -->
+      code: `<script setup>
+<!-- ❌ inválido -->
 <template v-show="cond">
   <h1>oi</h1>
 </template>
 
 <!-- ✅ aplique no elemento ou use v-if -->
-<h1 v-show="cond">oi</h1>`,
+<h1 v-show="cond">oi</h1>
+</script>`,
     },
     {
       tag: 'v-show-no-else',
       title: 'Limitação: não tem v-else',
       body: `v-show é binário: mostra ou esconde. Não existe v-show-else.
 Para alternar entre dois elementos, use v-if/v-else.`,
-      code: `<!-- ❌ não existe -->
+      code: `<script setup>
+<!-- ❌ não existe -->
 <p v-show="ok">ok</p>
 <p v-show-else>nok</p>
 
 <!-- ✅ -->
 <p v-if="ok">ok</p>
-<p v-else>nok</p>`,
+<p v-else>nok</p>
+</script>`,
     },
   ],
 

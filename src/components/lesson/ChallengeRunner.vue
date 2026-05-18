@@ -7,12 +7,14 @@ import { checkAnswer } from '@/composables/useChallenge'
 const props = defineProps<{
   challenge: Challenge
   complete: boolean
+  prevLabel?: string
   nextLabel?: string
 }>()
 
 const emit = defineEmits<{
   (e: 'complete', payload: { challengeId: string; firstTry: boolean }): void
   (e: 'next'): void
+  (e: 'prev'): void
 }>()
 
 function initialCode(c: Challenge): string {
@@ -79,14 +81,6 @@ function toggleSolution(): void {
   }
 }
 
-function onPrimaryClick(): void {
-  if (props.complete) {
-    emit('next')
-  } else {
-    verify()
-  }
-}
-
 function reset(): void {
   userCode.value = initialCode(props.challenge)
   feedback.value = null
@@ -123,39 +117,40 @@ const typeBadgeText = computed<string>(() => {
       :readonly="complete || showingSolution"
     />
 
-    <p
-      v-if="feedback && !feedback.ok"
-      class="challenge__error"
-      role="alert"
-    >
-      <span class="challenge__error-icon" aria-hidden="true">✗</span>
-      <span>{{ feedback.message }}</span>
-    </p>
+    <Transition name="alert">
+      <p
+        v-if="feedback && !feedback.ok"
+        class="challenge__error"
+        role="alert"
+      >
+        <span class="challenge__error-icon" aria-hidden="true">✗</span>
+        <span>{{ feedback.message }}</span>
+      </p>
+    </Transition>
 
-    <p
-      v-if="complete && feedback?.ok && nextLabel"
-      class="challenge__success"
-      role="status"
-    >
-      <span class="challenge__success-icon" aria-hidden="true">✓</span>
-      <span>Correto!</span>
-    </p>
+    <Transition name="alert">
+      <p
+        v-if="complete && feedback?.ok && nextLabel"
+        class="challenge__success"
+        role="status"
+      >
+        <span class="challenge__success-icon" aria-hidden="true">✓</span>
+        <span>Correto!</span>
+      </p>
+    </Transition>
 
-    <div class="challenge__actions">
+    <!-- Solving the challenge: Verificar + Ver solução on the left, Reiniciar muted on the right. -->
+    <div v-if="!complete" class="challenge__actions">
       <div class="challenge__actions-main">
         <button
-          v-if="!complete || nextLabel"
           type="button"
           class="btn btn-primary challenge__btn"
-          :class="{ 'challenge__btn--celebrated': complete && feedback?.ok }"
-          :disabled="!complete && showingSolution"
-          @click="onPrimaryClick"
+          :disabled="showingSolution"
+          @click="verify"
         >
-          <template v-if="complete">Próximo</template>
-          <template v-else>Verificar</template>
+          Verificar
         </button>
         <button
-          v-if="!complete"
           type="button"
           class="btn btn-secondary challenge__btn"
           @click="toggleSolution"
@@ -164,13 +159,34 @@ const typeBadgeText = computed<string>(() => {
         </button>
       </div>
       <button
-        v-if="!complete"
         type="button"
         class="challenge__reset-link"
         title="Limpar e tentar de novo"
         @click="reset"
       >
-        ↻ Reiniciar
+        ↻ Reset
+      </button>
+    </div>
+
+    <!-- After completing: Anterior on the left, Próximo on the right.
+         If only one of them is present (first or last challenge), it stays on the left. -->
+    <div v-else class="challenge__nav">
+      <button
+        v-if="prevLabel"
+        type="button"
+        class="btn btn-primary challenge__btn"
+        @click="emit('prev')"
+      >
+        {{ prevLabel }}
+      </button>
+      <button
+        v-if="nextLabel"
+        type="button"
+        class="btn btn-primary challenge__btn"
+        :class="{ 'challenge__btn--celebrated': feedback?.ok }"
+        @click="emit('next')"
+      >
+        {{ nextLabel }}
       </button>
     </div>
   </section>
@@ -262,6 +278,30 @@ const typeBadgeText = computed<string>(() => {
   }
 }
 
+/* <Transition name="alert"> — fade-in + slide-down on enter,
+   fade-out + slide-up on leave. Keeps the layout calm when the alert mounts/unmounts. */
+.alert-enter-active,
+.alert-leave-active {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    max-height 0.3s ease;
+  overflow: hidden;
+  max-height: 6rem;
+}
+
+.alert-enter-from {
+  opacity: 0;
+  transform: translateY(-6px);
+  max-height: 0;
+}
+
+.alert-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+  max-height: 0;
+}
+
 .challenge__actions {
   display: flex;
   align-items: center;
@@ -275,6 +315,19 @@ const typeBadgeText = computed<string>(() => {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.challenge__nav {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+/* When both Anterior and Próximo are present, push the second (Próximo) to the
+   right edge. When only one button is rendered, it stays on the left. */
+.challenge__nav > button:last-child:not(:only-child) {
+  margin-left: auto;
 }
 
 .challenge__btn {

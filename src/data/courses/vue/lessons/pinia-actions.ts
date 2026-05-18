@@ -16,7 +16,8 @@ const piniaActionsLesson: Lesson = {
       body: `Actions são funções que mutam state ou orquestram lógica.
 No setup-store, são funções normais retornadas no return.
 Diferente de Redux/Vuex, podem ser síncronas ou async — sem mutations.`,
-      code: `export const useContador = defineStore('contador', () => {
+      code: `<script setup>
+export const useContador = defineStore('contador', () => {
   const valor = ref(0)
   function incrementar() {
     valor.value++
@@ -26,7 +27,8 @@ Diferente de Redux/Vuex, podem ser síncronas ou async — sem mutations.`,
 
 // uso:
 const c = useContador()
-c.incrementar()`,
+c.incrementar()
+</script>`,
     },
     {
       tag: 'pinia-actions-async',
@@ -34,7 +36,8 @@ c.incrementar()`,
       body: `Actions podem ser async e usar await normalmente.
 Atualize refs depois do await — Vue rastreia a mudança e UI re-renderiza.
 Trate erros com try/catch.`,
-      code: `export const useUsuarios = defineStore('usuarios', () => {
+      code: `<script setup>
+export const useUsuarios = defineStore('usuarios', () => {
   const lista = ref([])
   const carregando = ref(false)
   const erro = ref(null)
@@ -52,14 +55,16 @@ Trate erros com try/catch.`,
   }
 
   return { lista, carregando, erro, carregar }
-})`,
+})
+</script>`,
     },
     {
       tag: 'pinia-actions-cross',
       title: 'Action chamando outro store',
       body: `Dentro de uma action, você pode usar outros stores: chame use*() (uma vez, no setup).
 Útil pra orquestrar lógica entre domínios (ex: pagamento ↔ carrinho).`,
-      code: `export const usePagamento = defineStore('pagamento', () => {
+      code: `<script setup>
+export const usePagamento = defineStore('pagamento', () => {
   const carrinho = useCarrinho()
   const status = ref('idle')
 
@@ -74,7 +79,8 @@ Trate erros com try/catch.`,
   }
 
   return { status, pagar }
-})`,
+})
+</script>`,
     },
     {
       tag: 'pinia-actions-this',
@@ -82,7 +88,8 @@ Trate erros com try/catch.`,
       body: `Em Options API, actions acessam state via this.valor (Pinia faz autobind).
 Em Setup API, você lê/escreve diretamente o ref/reactive — nunca usa this.
 Setup é mais idiomático com Composition API e elimina dúvidas sobre arrow vs regular.`,
-      code: `// Options API
+      code: `<script setup>
+// Options API
 export const useContador = defineStore('contador', {
   state: () => ({ valor: 0 }),
   actions: {
@@ -95,7 +102,8 @@ export const useContador = defineStore('contador', () => {
   const valor = ref(0)
   function inc() { valor.value++ }
   return { valor, inc }
-})`,
+})
+</script>`,
     },
   ],
 

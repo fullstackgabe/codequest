@@ -73,14 +73,16 @@ console.log(nome.value) // 'Bruno'
       body: `O getter de computed deve ser puro — só transformar e retornar.
 NÃO mude refs, não chame APIs, não modifique o DOM.
 Para efeitos colaterais, use watch ou watchEffect.`,
-      code: `// ❌ ruim: mutação dentro do getter
+      code: `<script setup>
+// ❌ ruim: mutação dentro do getter
 const total = computed(() => {
   contador.value++  // efeito colateral!
   return lista.value.length
 })
 
 // ✅ bom: puro
-const total = computed(() => lista.value.length)`,
+const total = computed(() => lista.value.length)
+</script>`,
     },
   ],
 
@@ -97,8 +99,10 @@ Método executa em cada render que o chama.`,
       front: 'Como acesso o valor de um computed?',
       back: `Via .value no script (igual ref).
 No template, Vue desembrulha — use sem .value.`,
-      code: `// script: nomeMaiusculo.value
-// template: {{ nomeMaiusculo }}`,
+      code: `<script setup>
+// script: nomeMaiusculo.value
+// template: {{ nomeMaiusculo }}
+</script>`,
       requires: ['computed-derived'],
     },
     {
@@ -106,10 +110,12 @@ No template, Vue desembrulha — use sem .value.`,
       front: 'Como criar um computed escritável?',
       back: `Passe { get, set } em vez de uma função.
 O setter recebe o novo valor e pode atualizar refs subjacentes.`,
-      code: `const c = computed({
+      code: `<script setup>
+const c = computed({
   get: () => state.value,
   set: (v) => { state.value = v }
-})`,
+})
+</script>`,
       requires: ['computed-getter-setter'],
     },
     {
