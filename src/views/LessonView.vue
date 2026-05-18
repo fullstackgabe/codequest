@@ -88,9 +88,14 @@ const nextLessonInModule = computed(() => {
   return mod.lessons[idx + 1] ?? null
 })
 
+const isEndOfModule = computed(
+  () => !hasNextChallenge.value && nextLessonInModule.value === null,
+)
+
 const nextLabel = computed<string | null>(() => {
   if (hasNextChallenge.value) return 'Próximo challenge →'
   if (nextLessonInModule.value) return 'Próxima lição →'
+  if (isEndOfModule.value) return '← Voltar aos módulos'
   return null
 })
 
@@ -102,7 +107,10 @@ function goNext(): void {
   const next = nextLessonInModule.value
   if (next) {
     router.push(`/course/${courseId.value}/lesson/${next.id}`)
+    return
   }
+  // End of module — back to the modules list (CourseView).
+  router.push(`/course/${courseId.value}`)
 }
 
 function switchTab(tab: Tab): void {
