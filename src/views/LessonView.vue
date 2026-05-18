@@ -225,21 +225,22 @@ function switchTab(tab: Tab): void {
             Esta lição não tem teoria. Pode ir direto pros challenges.
           </div>
           <template v-else-if="currentTheoryBlock">
-            <TheoryBlock :block="currentTheoryBlock" />
-
-            <div class="lesson-theory__dots" role="tablist" aria-label="Blocos de teoria">
+            <div class="lesson-theory__pills" role="tablist" aria-label="Blocos de teoria">
               <button
-                v-for="(_, idx) in theory"
-                :key="idx"
+                v-for="(block, idx) in theory"
+                :key="block.tag"
                 type="button"
                 role="tab"
                 :aria-selected="idx === theoryIndex"
-                :aria-label="`Bloco ${idx + 1} de ${theory.length}`"
-                class="lesson-theory__dot"
-                :class="{ 'lesson-theory__dot--active': idx === theoryIndex }"
+                class="lesson-theory__pill"
+                :class="{ 'lesson-theory__pill--active': idx === theoryIndex }"
                 @click="goToTheory(idx)"
-              />
+              >
+                {{ block.title }}
+              </button>
             </div>
+
+            <TheoryBlock :block="currentTheoryBlock" />
 
             <div v-if="isLastTheory" class="lesson-theory__finish">
               <button
@@ -358,40 +359,42 @@ function switchTab(tab: Tab): void {
   opacity: 0.6;
 }
 
-.lesson-theory__dots {
+.lesson-theory__pills {
   display: flex;
-  gap: 0.5rem;
-  justify-content: center;
-  margin-top: 1.75rem;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
 }
 
-.lesson-theory__dot {
-  width: 10px;
-  height: 10px;
-  padding: 0;
-  border: 1px solid var(--border);
+.lesson-theory__pill {
   background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 999px;
   cursor: pointer;
-  transition: transform 0.18s ease, background 0.18s ease,
-    border-color 0.18s ease, width 0.25s ease;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
 
-.lesson-theory__dot:hover {
+.lesson-theory__pill:hover {
+  color: var(--text);
   border-color: var(--primary);
-  transform: scale(1.15);
 }
 
-.lesson-theory__dot--active {
-  width: 24px;
-  background: var(--primary);
+.lesson-theory__pill--active {
+  color: var(--primary);
   border-color: var(--primary);
+  background: rgba(66, 184, 131, 0.1);
 }
 
 .lesson-theory__finish {
   display: flex;
   justify-content: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
 }
 
 .lesson-challenges__progress {
