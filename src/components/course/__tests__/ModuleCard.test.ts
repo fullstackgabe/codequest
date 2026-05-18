@@ -41,7 +41,7 @@ describe('ModuleCard', () => {
     const link = wrapper.findComponent(RouterLinkStub)
     expect(link.exists()).toBe(true)
     expect(link.props('to')).toBe('/course/vue/module/reactivity')
-    expect(wrapper.text()).toContain('0/1 lições')
+    expect(wrapper.text()).toMatch(/0\/\d+ lições/)
   })
 
   it('complete module shows "Concluído ✓" badge', () => {

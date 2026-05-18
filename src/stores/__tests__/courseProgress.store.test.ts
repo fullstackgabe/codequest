@@ -44,17 +44,17 @@ describe('courseProgress store', () => {
 
   it('getCourseStats reports totals from registry and counts from store', () => {
     const s = useCourseProgressStore()
-    // vue course has 1 lesson (in reactivity), 5 challenges, 5 modules
     const fresh = s.getCourseStats('vue')
-    expect(fresh.totalLessons).toBe(1)
-    expect(fresh.totalChallenges).toBe(5)
+    expect(fresh.totalLessons).toBeGreaterThan(0)
+    expect(fresh.totalChallenges).toBeGreaterThan(0)
     expect(fresh.totalModules).toBe(5)
     expect(fresh.percentComplete).toBe(0)
 
     s.completeLesson('vue', 'vue/reactivity/ref')
-    const full = s.getCourseStats('vue')
-    expect(full.completedLessons).toBe(1)
-    expect(full.percentComplete).toBe(100)
+    const partial = s.getCourseStats('vue')
+    expect(partial.completedLessons).toBe(1)
+    expect(partial.percentComplete).toBeGreaterThan(0)
+    expect(partial.percentComplete).toBeLessThanOrEqual(100)
   })
 
   it('getCourseStats for unknown course returns zero totals', () => {

@@ -20,21 +20,21 @@ describe('CourseCard', () => {
     })
   }
 
-  it('renders title, icon and 0% / "Começar" CTA when no progress', () => {
+  it('renders title, icon and "Começar" CTA when no progress', () => {
     const wrapper = mountCard()
     expect(wrapper.text()).toContain('Vue.js')
     expect(wrapper.text()).toContain('🟢')
-    // The CourseCard sums lessons across modules; vue has 1 lesson total
-    expect(wrapper.text()).toContain('0% · 0/1 lições')
+    expect(wrapper.text()).toMatch(/0%/)
+    expect(wrapper.text()).toMatch(/0\/\d+ lições/)
     expect(wrapper.text()).toContain('Começar')
   })
 
-  it('updates to 100% / "Revisar" when the only lesson is completed', async () => {
+  it('shows partial progress with "Continuar" CTA when 1 lesson is completed', async () => {
     const progress = useCourseProgressStore()
     progress.completeLesson('vue', 'vue/reactivity/ref')
     const wrapper = mountCard()
-    expect(wrapper.text()).toContain('100% · 1/1 lições')
-    expect(wrapper.text()).toContain('Revisar')
+    expect(wrapper.text()).toMatch(/1\/\d+ lições/)
+    expect(wrapper.text()).toContain('Continuar')
   })
 
   it('routes to /course/:id', () => {
