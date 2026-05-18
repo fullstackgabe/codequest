@@ -1,0 +1,37 @@
+{
+  "name": "code_quest",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "type-check": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@codemirror/autocomplete": "^6.20.1",
+    "@codemirror/lang-html": "^6.4.11",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/state": "^6.6.0",
+    "@codemirror/view": "^6.41.0",
+    "@vue/repl": "^4.7.2",
+    "codemirror": "^6.0.2",
+    "pinia": "^3.0.4",
+    "vue": "^3.5.32",
+    "vue-router": "^4.6.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.5",
+    "@vue/test-utils": "^2.4.6",
+    "@vue/tsconfig": "^0.7.0",
+    "expect-type": "^1.1.0",
+    "jsdom": "^25.0.1",
+    "typescript": "^5.7.2",
+    "vite": "^8.0.4",
+    "vitest": "^2.1.8",
+    "vue-tsc": "^2.2.0"
+  }
+}
