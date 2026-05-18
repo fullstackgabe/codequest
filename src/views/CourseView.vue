@@ -15,6 +15,7 @@ const { course, notFound } = useCourse(courseIdRef)
 const progress = useCourseProgressStore()
 const srs = useSRSStore()
 const dueCount = computed(() => srs.dueCount(courseIdRef.value))
+const reviewPath = computed(() => `/course/${courseIdRef.value}/review`)
 
 function isModuleComplete(courseId: string, mod: Module): boolean {
   if (mod.lessons.length === 0) return true
@@ -49,7 +50,7 @@ const unlockedIndices = useUnlockMap<Module>(modulesRef, (mod) =>
           <p class="course-header__description">{{ course.description }}</p>
           <RouterLink
             v-if="dueCount > 0"
-            :to="`/course/${courseIdRef}/review`"
+            :to="reviewPath"
             class="course-header__due-link"
           >
             🔁 {{ dueCount }} {{ dueCount === 1 ? 'card' : 'cards' }} pra revisar
