@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import type { Challenge } from '@/types/challenge'
 import CodeEditor from './CodeEditor.vue'
 import { checkAnswer } from '@/composables/useChallenge'
@@ -36,6 +36,24 @@ const showingSolution = ref(props.complete)
 const attempts = ref(0)
 const savedUserCode = ref(userCode.value)
 
+// Auto-dismiss the inline alert after a short window so it doesn't linger.
+const FEEDBACK_TTL_MS = 3000
+let feedbackTimer: ReturnType<typeof setTimeout> | null = null
+
+function scheduleFeedbackClear(): void {
+  if (feedbackTimer !== null) clearTimeout(feedbackTimer)
+  feedbackTimer = setTimeout(() => {
+    feedback.value = null
+  }, FEEDBACK_TTL_MS)
+}
+
+function cancelFeedbackClear(): void {
+  if (feedbackTimer !== null) {
+    clearTimeout(feedbackTimer)
+    feedbackTimer = null
+  }
+}
+
 watch(
   () => props.challenge.id,
   () => {
@@ -43,11 +61,14 @@ watch(
       ? props.challenge.solution
       : initialCode(props.challenge)
     feedback.value = null
+    cancelFeedbackClear()
     showingSolution.value = props.complete
     attempts.value = 0
     savedUserCode.value = userCode.value
   },
 )
+
+onBeforeUnmount(cancelFeedbackClear)
 
 function verify(): void {
   const passed = checkAnswer(userCode.value, props.challenge)
@@ -68,6 +89,7 @@ function verify(): void {
       message: 'Ainda não está certo.',
     }
   }
+  scheduleFeedbackClear()
 }
 
 function toggleSolution(): void {
