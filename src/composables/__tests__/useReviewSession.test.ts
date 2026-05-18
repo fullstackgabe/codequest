@@ -14,12 +14,12 @@ describe('useReviewSession', () => {
   function registerStubCards() {
     const srs = useSRSStore()
     // Stub course has 2 flashcards
-    srs.registerCard('stub', 'stub/intro/hello-world/fc-1')
-    srs.registerCard('stub', 'stub/intro/variables/fc-1')
+    srs.registerCard('vue', 'vue/reactivity/ref/fc-1')
+    srs.registerCard('vue', 'vue/reactivity/ref/fc-2')
   }
 
   it('returns null currentCard when there are no due cards', () => {
-    const session = useReviewSession('stub')
+    const session = useReviewSession('vue')
     expect(session.currentCard.value).toBeNull()
     expect(session.progress.value.total).toBe(0)
     expect(session.isFinished.value).toBe(false)
@@ -27,16 +27,16 @@ describe('useReviewSession', () => {
 
   it('snapshots up to SESSION_LIMIT due cards', () => {
     registerStubCards()
-    const session = useReviewSession('stub')
+    const session = useReviewSession('vue')
     expect(session.progress.value.total).toBeGreaterThan(0)
     expect(session.progress.value.total).toBeLessThanOrEqual(SESSION_LIMIT)
-    expect(session.currentCard.value?.id).toBe('stub/intro/hello-world/fc-1')
+    expect(session.currentCard.value?.id).toBe('vue/reactivity/ref/fc-1')
   })
 
   it('rate(5) awards REVIEW_PERFECT XP, updates stats, advances cursor', () => {
     registerStubCards()
     const xp = useXPStore()
-    const session = useReviewSession('stub')
+    const session = useReviewSession('vue')
     const before = session.progress.value.index
 
     session.rate(5)
@@ -49,7 +49,7 @@ describe('useReviewSession', () => {
   it('rate(0) awards no XP, increments fail count', () => {
     registerStubCards()
     const xp = useXPStore()
-    const session = useReviewSession('stub')
+    const session = useReviewSession('vue')
 
     session.rate(0)
 
@@ -59,7 +59,7 @@ describe('useReviewSession', () => {
 
   it('isFinished becomes true after rating all cards', () => {
     registerStubCards()
-    const session = useReviewSession('stub')
+    const session = useReviewSession('vue')
     const total = session.progress.value.total
     for (let i = 0; i < total; i++) {
       session.rate(5)
@@ -70,7 +70,7 @@ describe('useReviewSession', () => {
 
   it('restart rebuilds the snapshot and resets stats', () => {
     registerStubCards()
-    const session = useReviewSession('stub')
+    const session = useReviewSession('vue')
     session.rate(5)
     expect(session.sessionStats.value.perfect).toBe(1)
 

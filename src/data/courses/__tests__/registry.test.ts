@@ -9,28 +9,28 @@ import {
 } from '../index'
 
 describe('course registry', () => {
-  it('listCourses includes the stub course', () => {
+  it('listCourses includes the vue course', () => {
     const courses = listCourses()
     expect(courses.length).toBeGreaterThanOrEqual(1)
-    expect(courses.some((c) => c.id === 'stub')).toBe(true)
+    expect(courses.some((c) => c.id === 'vue')).toBe(true)
   })
 
   it('getCourse returns the course or null', () => {
-    expect(getCourse('stub')?.id).toBe('stub')
+    expect(getCourse('vue')?.id).toBe('vue')
     expect(getCourse('nonexistent')).toBeNull()
   })
 
   it('getModule resolves a module within a course', () => {
-    expect(getModule('stub', 'intro')?.id).toBe('intro')
-    expect(getModule('stub', 'missing')).toBeNull()
-    expect(getModule('missing', 'intro')).toBeNull()
+    expect(getModule('vue', 'reactivity')?.id).toBe('reactivity')
+    expect(getModule('vue', 'missing')).toBeNull()
+    expect(getModule('missing', 'reactivity')).toBeNull()
   })
 
   it('getLesson parses courseId/moduleId/slug and returns the lesson', () => {
-    const lesson = getLesson('stub/intro/hello-world')
-    expect(lesson?.id).toBe('stub/intro/hello-world')
-    expect(lesson?.courseId).toBe('stub')
-    expect(lesson?.moduleId).toBe('intro')
+    const lesson = getLesson('vue/reactivity/ref')
+    expect(lesson?.id).toBe('vue/reactivity/ref')
+    expect(lesson?.courseId).toBe('vue')
+    expect(lesson?.moduleId).toBe('reactivity')
   })
 
   it('getLesson returns null for malformed or unknown ids', () => {
@@ -43,20 +43,20 @@ describe('course registry', () => {
   it('getAllFlashcards augments each card with course/module/lesson ids and title', () => {
     const cards = getAllFlashcards()
     expect(cards.length).toBeGreaterThan(0)
-    const helloCard = cards.find((c) => c.id === 'stub/intro/hello-world/fc-1')
+    const helloCard = cards.find((c) => c.id === 'vue/reactivity/ref/fc-1')
     expect(helloCard).toBeDefined()
-    expect(helloCard?.courseId).toBe('stub')
-    expect(helloCard?.moduleId).toBe('intro')
-    expect(helloCard?.lessonId).toBe('stub/intro/hello-world')
-    expect(helloCard?.lessonTitle).toBe('Hello World')
+    expect(helloCard?.courseId).toBe('vue')
+    expect(helloCard?.moduleId).toBe('reactivity')
+    expect(helloCard?.lessonId).toBe('vue/reactivity/ref')
+    expect(helloCard?.lessonTitle).toBe('ref()')
   })
 
   it('getAllChallenges augments each challenge similarly', () => {
     const challenges = getAllChallenges()
     expect(challenges.length).toBeGreaterThan(0)
-    const ch = challenges.find((c) => c.id === 'stub/intro/hello-world/ch-1')
+    const ch = challenges.find((c) => c.id === 'vue/reactivity/ref/ch-1')
     expect(ch).toBeDefined()
-    expect(ch?.courseId).toBe('stub')
-    expect(ch?.lessonTitle).toBe('Hello World')
+    expect(ch?.courseId).toBe('vue')
+    expect(ch?.lessonTitle).toBe('ref()')
   })
 })

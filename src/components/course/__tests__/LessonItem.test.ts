@@ -5,10 +5,10 @@ import { getLesson } from '@/data/courses'
 
 describe('LessonItem', () => {
   function mountItem(opts: { locked: boolean; complete: boolean }) {
-    const lesson = getLesson('stub/intro/hello-world')
-    if (!lesson) throw new Error('stub lesson missing')
+    const lesson = getLesson('vue/reactivity/ref')
+    if (!lesson) throw new Error('vue lesson missing')
     return mount(LessonItem, {
-      props: { lesson, locked: opts.locked, complete: opts.complete, courseId: 'stub' },
+      props: { lesson, locked: opts.locked, complete: opts.complete, courseId: 'vue' },
       global: { stubs: { RouterLink: RouterLinkStub } },
     })
   }
@@ -28,6 +28,6 @@ describe('LessonItem', () => {
     const wrapper = mountItem({ locked: false, complete: false })
     const link = wrapper.findComponent(RouterLinkStub)
     expect(link.exists()).toBe(true)
-    expect(link.props('to')).toBe('/course/stub/lesson/stub/intro/hello-world')
+    expect(link.props('to')).toBe('/course/vue/lesson/vue/reactivity/ref')
   })
 })

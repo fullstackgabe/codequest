@@ -51,7 +51,13 @@ const target = computed(
     <p class="module-card__description">{{ module.description }}</p>
 
     <div class="module-card__progress">
-      <span class="module-card__count">
+      <span
+        v-if="totalCount === 0"
+        class="module-card__count module-card__count--soon"
+      >
+        Em breve
+      </span>
+      <span v-else class="module-card__count">
         {{ completedCount }}/{{ totalCount }} lições
       </span>
     </div>
@@ -105,5 +111,10 @@ const target = computed(
   font-family: var(--font-mono);
   font-size: 0.8rem;
   color: var(--text-dim);
+}
+
+.module-card__count--soon {
+  color: var(--text-muted);
+  font-style: italic;
 }
 </style>

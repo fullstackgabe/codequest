@@ -5,11 +5,11 @@ import { useLesson } from '../useLesson'
 describe('useLesson', () => {
   it('returns lesson + module + course for a valid id', () => {
     const { lesson, module, course, notFound } = useLesson(
-      ref('stub/intro/hello-world'),
+      ref('vue/reactivity/ref'),
     )
-    expect(lesson.value?.id).toBe('stub/intro/hello-world')
-    expect(module.value?.id).toBe('intro')
-    expect(course.value?.id).toBe('stub')
+    expect(lesson.value?.id).toBe('vue/reactivity/ref')
+    expect(module.value?.id).toBe('reactivity')
+    expect(course.value?.id).toBe('vue')
     expect(notFound.value).toBe(false)
   })
 
@@ -22,12 +22,12 @@ describe('useLesson', () => {
   })
 
   it('reacts to id changes', () => {
-    const id = ref('stub/intro/hello-world')
+    const id = ref('vue/reactivity/ref')
     const { lesson, notFound } = useLesson(id)
-    expect(lesson.value?.id).toBe('stub/intro/hello-world')
+    expect(lesson.value?.id).toBe('vue/reactivity/ref')
 
-    id.value = 'stub/intro/variables'
-    expect(lesson.value?.id).toBe('stub/intro/variables')
+    id.value = 'vue/reactivity/ref'
+    expect(lesson.value?.id).toBe('vue/reactivity/ref')
     expect(notFound.value).toBe(false)
 
     id.value = 'nope'

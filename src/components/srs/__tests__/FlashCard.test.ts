@@ -4,7 +4,7 @@ import FlashCard from '../FlashCard.vue'
 import type { Flashcard } from '@/types/flashcard'
 
 const baseCard: Flashcard = {
-  id: 'stub/intro/hello-world/fc-1',
+  id: 'vue/reactivity/ref/fc-1',
   front: 'Qual a função?',
   back: 'console.log()',
   requires: ['hello-world'],
@@ -43,7 +43,7 @@ describe('FlashCard', () => {
     expect(wrapper.text()).toContain('console.log()')
 
     const otherCard: Flashcard = {
-      id: 'stub/intro/variables/fc-1',
+      id: 'vue/reactivity/ref/fc-2',
       front: 'Qual keyword?',
       back: 'const',
       requires: ['variables'],

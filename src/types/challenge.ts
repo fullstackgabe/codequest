@@ -5,6 +5,7 @@ interface ChallengeBase {
   xpReward: number
   requires: string[]
   solution: string
+  hint?: string
   explanation?: string
   lessonId?: string
   moduleId?: string

@@ -4,12 +4,12 @@ import type { Lesson } from '@/types/lesson'
 import type { Flashcard } from '@/types/flashcard'
 import type { Challenge } from '@/types/challenge'
 
-import stubCourse from './stub'
+import vueCourse from './vue'
 
 // Adding a new course:
 // 1. Create src/data/courses/<id>/index.ts that default-exports a `Course`
 // 2. Add an import here and append to `courses` below
-const courses: Course[] = [stubCourse]
+const courses: Course[] = [vueCourse]
 
 // Warn (DEV only) about duplicate course IDs — first registration wins.
 if (import.meta.env?.DEV) {

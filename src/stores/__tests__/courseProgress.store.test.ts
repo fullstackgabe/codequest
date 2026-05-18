@@ -10,51 +10,51 @@ describe('courseProgress store', () => {
 
   it('completeLesson is idempotent (returns false on second call)', () => {
     const s = useCourseProgressStore()
-    expect(s.completeLesson('stub', 'stub/intro/hello-world')).toBe(true)
-    expect(s.completeLesson('stub', 'stub/intro/hello-world')).toBe(false)
-    expect(s.isLessonComplete('stub', 'stub/intro/hello-world')).toBe(true)
+    expect(s.completeLesson('vue', 'vue/reactivity/ref')).toBe(true)
+    expect(s.completeLesson('vue', 'vue/reactivity/ref')).toBe(false)
+    expect(s.isLessonComplete('vue', 'vue/reactivity/ref')).toBe(true)
   })
 
   it('progress is namespaced per course', () => {
     const s = useCourseProgressStore()
-    s.completeLesson('stub', 'stub/intro/hello-world')
-    expect(s.isLessonComplete('stub', 'stub/intro/hello-world')).toBe(true)
-    expect(s.isLessonComplete('other-course', 'stub/intro/hello-world')).toBe(false)
+    s.completeLesson('vue', 'vue/reactivity/ref')
+    expect(s.isLessonComplete('vue', 'vue/reactivity/ref')).toBe(true)
+    expect(s.isLessonComplete('other-course', 'vue/reactivity/ref')).toBe(false)
   })
 
   it('completeChallenge and completeModule are also namespaced + idempotent', () => {
     const s = useCourseProgressStore()
-    expect(s.completeChallenge('stub', 'ch-1')).toBe(true)
-    expect(s.completeChallenge('stub', 'ch-1')).toBe(false)
-    expect(s.isChallengeComplete('stub', 'ch-1')).toBe(true)
+    expect(s.completeChallenge('vue', 'ch-1')).toBe(true)
+    expect(s.completeChallenge('vue', 'ch-1')).toBe(false)
+    expect(s.isChallengeComplete('vue', 'ch-1')).toBe(true)
     expect(s.isChallengeComplete('other', 'ch-1')).toBe(false)
 
-    expect(s.completeModule('stub', 'intro')).toBe(true)
-    expect(s.completeModule('stub', 'intro')).toBe(false)
-    expect(s.isModuleComplete('stub', 'intro')).toBe(true)
+    expect(s.completeModule('vue', 'reactivity')).toBe(true)
+    expect(s.completeModule('vue', 'reactivity')).toBe(false)
+    expect(s.isModuleComplete('vue', 'reactivity')).toBe(true)
   })
 
   it('persists across reinstantiation', () => {
     const a = useCourseProgressStore()
-    a.completeLesson('stub', 'stub/intro/hello-world')
+    a.completeLesson('vue', 'vue/reactivity/ref')
     setActivePinia(createPinia())
     const b = useCourseProgressStore()
-    expect(b.isLessonComplete('stub', 'stub/intro/hello-world')).toBe(true)
+    expect(b.isLessonComplete('vue', 'vue/reactivity/ref')).toBe(true)
   })
 
   it('getCourseStats reports totals from registry and counts from store', () => {
     const s = useCourseProgressStore()
-    // stub course has 2 lessons, 2 challenges, 1 module
-    const fresh = s.getCourseStats('stub')
-    expect(fresh.totalLessons).toBe(2)
-    expect(fresh.totalChallenges).toBe(2)
-    expect(fresh.totalModules).toBe(1)
+    // vue course has 1 lesson (in reactivity), 5 challenges, 5 modules
+    const fresh = s.getCourseStats('vue')
+    expect(fresh.totalLessons).toBe(1)
+    expect(fresh.totalChallenges).toBe(5)
+    expect(fresh.totalModules).toBe(5)
     expect(fresh.percentComplete).toBe(0)
 
-    s.completeLesson('stub', 'stub/intro/hello-world')
-    const half = s.getCourseStats('stub')
-    expect(half.completedLessons).toBe(1)
-    expect(half.percentComplete).toBe(50)
+    s.completeLesson('vue', 'vue/reactivity/ref')
+    const full = s.getCourseStats('vue')
+    expect(full.completedLessons).toBe(1)
+    expect(full.percentComplete).toBe(100)
   })
 
   it('getCourseStats for unknown course returns zero totals', () => {
@@ -68,11 +68,11 @@ describe('courseProgress store', () => {
 
   it('reset clears all course progress and removes storage', () => {
     const s = useCourseProgressStore()
-    s.completeLesson('stub', 'stub/intro/hello-world')
-    s.completeChallenge('stub', 'ch-1')
+    s.completeLesson('vue', 'vue/reactivity/ref')
+    s.completeChallenge('vue', 'ch-1')
     s.reset()
-    expect(s.isLessonComplete('stub', 'stub/intro/hello-world')).toBe(false)
-    expect(s.isChallengeComplete('stub', 'ch-1')).toBe(false)
+    expect(s.isLessonComplete('vue', 'vue/reactivity/ref')).toBe(false)
+    expect(s.isChallengeComplete('vue', 'ch-1')).toBe(false)
     expect(localStorage.getItem('codequest_course_progress')).toBeNull()
   })
 })

@@ -12,8 +12,8 @@ describe('CourseCard', () => {
   })
 
   function mountCard() {
-    const course = getCourse('stub')
-    if (!course) throw new Error('stub course missing from registry')
+    const course = getCourse('vue')
+    if (!course) throw new Error('vue course missing from registry')
     return mount(CourseCard, {
       props: { course },
       global: { stubs: { RouterLink: RouterLinkStub } },
@@ -22,23 +22,24 @@ describe('CourseCard', () => {
 
   it('renders title, icon and 0% / "Começar" CTA when no progress', () => {
     const wrapper = mountCard()
-    expect(wrapper.text()).toContain('Curso Stub')
-    expect(wrapper.text()).toContain('🧪')
-    expect(wrapper.text()).toContain('0% · 0/2 lições')
+    expect(wrapper.text()).toContain('Vue.js')
+    expect(wrapper.text()).toContain('🟢')
+    // The CourseCard sums lessons across modules; vue has 1 lesson total
+    expect(wrapper.text()).toContain('0% · 0/1 lições')
     expect(wrapper.text()).toContain('Começar')
   })
 
-  it('updates to 50% and "Continuar" when 1 lesson is completed', async () => {
+  it('updates to 100% / "Revisar" when the only lesson is completed', async () => {
     const progress = useCourseProgressStore()
-    progress.completeLesson('stub', 'stub/intro/hello-world')
+    progress.completeLesson('vue', 'vue/reactivity/ref')
     const wrapper = mountCard()
-    expect(wrapper.text()).toContain('50% · 1/2 lições')
-    expect(wrapper.text()).toContain('Continuar')
+    expect(wrapper.text()).toContain('100% · 1/1 lições')
+    expect(wrapper.text()).toContain('Revisar')
   })
 
   it('routes to /course/:id', () => {
     const wrapper = mountCard()
     const link = wrapper.findComponent(RouterLinkStub)
-    expect(link.props('to')).toBe('/course/stub')
+    expect(link.props('to')).toBe('/course/vue')
   })
 })

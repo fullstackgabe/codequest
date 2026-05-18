@@ -12,19 +12,19 @@ describe('ModuleCard', () => {
   })
 
   function mountCard(opts: { locked: boolean; complete?: boolean }) {
-    const course = getCourse('stub')
-    if (!course || !course.modules[0]) throw new Error('stub missing')
+    const course = getCourse('vue')
+    if (!course || !course.modules[0]) throw new Error('vue missing')
     if (opts.complete) {
       const progress = useCourseProgressStore()
       for (const lesson of course.modules[0].lessons) {
-        progress.completeLesson('stub', lesson.id)
+        progress.completeLesson('vue', lesson.id)
       }
     }
     return mount(ModuleCard, {
       props: {
         module: course.modules[0],
         locked: opts.locked,
-        courseId: 'stub',
+        courseId: 'vue',
       },
       global: { stubs: { RouterLink: RouterLinkStub } },
     })
@@ -40,8 +40,8 @@ describe('ModuleCard', () => {
     const wrapper = mountCard({ locked: false })
     const link = wrapper.findComponent(RouterLinkStub)
     expect(link.exists()).toBe(true)
-    expect(link.props('to')).toBe('/course/stub/module/intro')
-    expect(wrapper.text()).toContain('0/2 lições')
+    expect(link.props('to')).toBe('/course/vue/module/reactivity')
+    expect(wrapper.text()).toContain('0/1 lições')
   })
 
   it('complete module shows "Concluído ✓" badge', () => {

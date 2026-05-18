@@ -4,7 +4,7 @@ import ChallengeRunner from '../ChallengeRunner.vue'
 import type { FillBlankChallenge } from '@/types/challenge'
 
 const fillBlank: FillBlankChallenge = {
-  id: 'stub/intro/hello-world/ch-1',
+  id: 'vue/reactivity/ref/ch-1',
   type: 'fill-blank',
   title: 'Imprima Hello, World',
   description: 'Complete o código',
