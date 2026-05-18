@@ -7,10 +7,12 @@ import { checkAnswer } from '@/composables/useChallenge'
 const props = defineProps<{
   challenge: Challenge
   complete: boolean
+  nextLabel?: string
 }>()
 
 const emit = defineEmits<{
   (e: 'complete', payload: { challengeId: string; firstTry: boolean }): void
+  (e: 'next'): void
 }>()
 
 function initialCode(c: Challenge): string {
@@ -134,6 +136,7 @@ const typeBadgeText = computed<string>(() => {
         Verificar
       </button>
       <button
+        v-if="!complete"
         type="button"
         class="btn btn-secondary"
         @click="toggleSolution"
@@ -147,6 +150,14 @@ const typeBadgeText = computed<string>(() => {
         @click="reset"
       >
         Reset
+      </button>
+      <button
+        v-if="complete && nextLabel"
+        type="button"
+        class="btn btn-primary"
+        @click="emit('next')"
+      >
+        {{ nextLabel }}
       </button>
     </div>
   </section>

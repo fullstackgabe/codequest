@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, toRef, watch } from 'vue'
-import { RouterLink, useRoute } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useLesson } from '@/composables/useLesson'
 import { useCourseProgressStore } from '@/stores/courseProgress'
 import { useAwardActivity } from '@/composables/useAwardActivity'
@@ -8,6 +8,7 @@ import TheoryBlock from '@/components/lesson/TheoryBlock.vue'
 import ChallengeRunner from '@/components/lesson/ChallengeRunner.vue'
 
 const route = useRoute()
+const router = useRouter()
 const courseId = toRef(() => String(route.params.courseId ?? ''))
 const lessonId = toRef(() => String(route.params.lessonId ?? ''))
 
@@ -72,6 +73,36 @@ function onChallengeComplete(payload: {
 
 function selectChallenge(idx: number): void {
   activeChallengeIndex.value = idx
+}
+
+const hasNextChallenge = computed(
+  () => activeChallengeIndex.value < challenges.value.length - 1,
+)
+
+const nextLessonInModule = computed(() => {
+  const mod = module.value
+  const cur = lesson.value
+  if (!mod || !cur) return null
+  const idx = mod.lessons.findIndex((l) => l.id === cur.id)
+  if (idx < 0 || idx >= mod.lessons.length - 1) return null
+  return mod.lessons[idx + 1] ?? null
+})
+
+const nextLabel = computed<string | null>(() => {
+  if (hasNextChallenge.value) return 'Próximo challenge →'
+  if (nextLessonInModule.value) return 'Próxima lição →'
+  return null
+})
+
+function goNext(): void {
+  if (hasNextChallenge.value) {
+    activeChallengeIndex.value += 1
+    return
+  }
+  const next = nextLessonInModule.value
+  if (next) {
+    router.push(`/course/${courseId.value}/lesson/${next.id}`)
+  }
 }
 
 function switchTab(tab: Tab): void {
@@ -203,7 +234,9 @@ function switchTab(tab: Tab): void {
             <ChallengeRunner
               :challenge="activeChallenge"
               :complete="isChallengeComplete(activeChallenge.id)"
+              :next-label="nextLabel ?? undefined"
               @complete="onChallengeComplete"
+              @next="goNext"
             />
           </template>
         </section>
