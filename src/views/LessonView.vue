@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, toRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, toRef, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useLesson } from '@/composables/useLesson'
 import { useCourseProgressStore } from '@/stores/courseProgress'
@@ -61,6 +61,28 @@ function nextTheory(): void {
 function prevTheory(): void {
   if (theoryIndex.value > 0) theoryIndex.value -= 1
 }
+
+function goToTheory(idx: number): void {
+  if (idx >= 0 && idx < theory.value.length) theoryIndex.value = idx
+}
+
+function handleTheoryKey(event: KeyboardEvent): void {
+  if (activeTab.value !== 'theory') return
+  const target = event.target as HTMLElement | null
+  // Don't hijack arrows when the user is typing in an editor or input.
+  if (target?.closest('input, textarea, [contenteditable="true"], .cm-editor'))
+    return
+  if (event.key === 'ArrowRight') {
+    event.preventDefault()
+    nextTheory()
+  } else if (event.key === 'ArrowLeft') {
+    event.preventDefault()
+    prevTheory()
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', handleTheoryKey))
+onBeforeUnmount(() => window.removeEventListener('keydown', handleTheoryKey))
 
 function completeTheory(): void {
   if (!lesson.value) return
@@ -205,33 +227,27 @@ function switchTab(tab: Tab): void {
           <template v-else-if="currentTheoryBlock">
             <TheoryBlock :block="currentTheoryBlock" />
 
-            <div class="lesson-theory__nav">
-              <span class="lesson-theory__index">
-                {{ theoryIndex + 1 }} / {{ theory.length }}
-              </span>
+            <div class="lesson-theory__dots" role="tablist" aria-label="Blocos de teoria">
+              <button
+                v-for="(_, idx) in theory"
+                :key="idx"
+                type="button"
+                role="tab"
+                :aria-selected="idx === theoryIndex"
+                :aria-label="`Bloco ${idx + 1} de ${theory.length}`"
+                class="lesson-theory__dot"
+                :class="{ 'lesson-theory__dot--active': idx === theoryIndex }"
+                @click="goToTheory(idx)"
+              />
+            </div>
+
+            <div v-if="isLastTheory" class="lesson-theory__finish">
               <button
                 type="button"
-                class="btn btn-ghost btn-sm"
-                :disabled="theoryIndex === 0"
-                @click="prevTheory"
-              >
-                ← Anterior
-              </button>
-              <button
-                v-if="!isLastTheory"
-                type="button"
-                class="btn btn-secondary btn-sm"
-                @click="nextTheory"
-              >
-                Próximo →
-              </button>
-              <button
-                v-else
-                type="button"
-                class="btn btn-primary btn-sm"
+                class="btn btn-primary"
                 @click="completeTheory"
               >
-                {{ theoryComplete ? 'Continuar' : 'Concluir teoria' }}
+                {{ theoryComplete ? 'Ir para os challenges →' : 'Concluir teoria →' }}
               </button>
             </div>
           </template>
@@ -342,18 +358,40 @@ function switchTab(tab: Tab): void {
   opacity: 0.6;
 }
 
-.lesson-theory__nav {
+.lesson-theory__dots {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-top: 1.75rem;
 }
 
-.lesson-theory__index {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--text-dim);
-  margin-right: auto;
+.lesson-theory__dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease,
+    border-color 0.18s ease, width 0.25s ease;
+}
+
+.lesson-theory__dot:hover {
+  border-color: var(--primary);
+  transform: scale(1.15);
+}
+
+.lesson-theory__dot--active {
+  width: 24px;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.lesson-theory__finish {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
 }
 
 .lesson-challenges__progress {
