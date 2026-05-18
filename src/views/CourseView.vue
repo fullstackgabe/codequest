@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router'
 import { useCourse } from '@/composables/useCourse'
 import { useUnlockMap } from '@/composables/useUnlockMap'
 import { useCourseProgressStore } from '@/stores/courseProgress'
+import { useSRSStore } from '@/stores/srs'
 import ModuleCard from '@/components/course/ModuleCard.vue'
 import type { Module } from '@/types/module'
 
@@ -12,6 +13,8 @@ const courseIdRef = toRef(() => String(route.params.courseId ?? ''))
 const { course, notFound } = useCourse(courseIdRef)
 
 const progress = useCourseProgressStore()
+const srs = useSRSStore()
+const dueCount = computed(() => srs.dueCount(courseIdRef.value))
 
 function isModuleComplete(courseId: string, mod: Module): boolean {
   if (mod.lessons.length === 0) return true
@@ -44,6 +47,13 @@ const unlockedIndices = useUnlockMap<Module>(modulesRef, (mod) =>
             <h1>{{ course.title }}</h1>
           </div>
           <p class="course-header__description">{{ course.description }}</p>
+          <RouterLink
+            v-if="dueCount > 0"
+            :to="`/course/${courseIdRef}/review`"
+            class="course-header__due-link"
+          >
+            🔁 {{ dueCount }} {{ dueCount === 1 ? 'card' : 'cards' }} pra revisar
+          </RouterLink>
         </header>
 
         <section class="course-modules">
@@ -102,6 +112,24 @@ const unlockedIndices = useUnlockMap<Module>(modulesRef, (mod) =>
 .course-header__description {
   color: var(--text-muted);
   margin: 0.5rem 0 0;
+}
+
+.course-header__due-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: rgba(251, 191, 36, 0.12);
+  color: var(--xp-gold);
+  font-size: 0.85rem;
+  text-decoration: none;
+  border: 1px solid rgba(251, 191, 36, 0.3);
+}
+
+.course-header__due-link:hover {
+  background: rgba(251, 191, 36, 0.2);
 }
 
 .course-modules h2 {
