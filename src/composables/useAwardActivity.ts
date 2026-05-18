@@ -5,6 +5,7 @@ import { useStreakStore } from '@/stores/streak'
 import { useSRSStore } from '@/stores/srs'
 import { getLesson } from '@/data/courses'
 import { XP_REWARDS } from '@/utils/xpRewards'
+// XP_REWARDS used by completeChallenge; completeLesson awards no XP.
 
 export interface AwardResult {
   awarded: boolean
@@ -19,6 +20,8 @@ export function useAwardActivity() {
   const streak = useStreakStore()
   const srs = useSRSStore()
 
+  // Lesson completion no longer awards XP — only challenges do (the user's rule).
+  // This still registers flashcards in SRS and bumps the streak.
   function completeLesson(courseId: string, lessonId: string): AwardResult {
     const lesson = getLesson(lessonId)
     if (!lesson) return { awarded: false, xpResult: NOOP_XP }
@@ -26,12 +29,11 @@ export function useAwardActivity() {
     const wasNew = courseProgress.completeLesson(courseId, lessonId)
     if (!wasNew) return { awarded: false, xpResult: NOOP_XP }
 
-    const xpResult = xp.addXP(XP_REWARDS.LESSON_COMPLETE)
     streak.updateStreak()
     for (const card of lesson.flashcards) {
       srs.registerCard(courseId, card.id)
     }
-    return { awarded: true, xpResult }
+    return { awarded: true, xpResult: NOOP_XP }
   }
 
   function completeChallenge(

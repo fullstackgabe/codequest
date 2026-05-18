@@ -21,6 +21,11 @@ const reviewPath = computed(() =>
   currentCourseId.value ? `/course/${currentCourseId.value}/review` : null,
 )
 
+const srs = useSRSStore()
+const dueCount = computed(() =>
+  currentCourseId.value ? srs.dueCount(currentCourseId.value) : 0,
+)
+
 const showResetModal = ref(false)
 
 function openResetModal(): void {
@@ -33,7 +38,9 @@ function confirmReset(): void {
   useLevelUpStore().reset()
   useCourseProgressStore().reset()
   useSRSStore().reset()
-  window.location.reload()
+  // Hard navigate to the hub so any in-memory state held by views is
+  // re-initialised from the now-empty stores.
+  window.location.href = '/'
 }
 </script>
 
@@ -52,6 +59,9 @@ function confirmReset(): void {
           class="app-header__nav-link"
         >
           Revisão
+          <span v-if="dueCount > 0" class="app-header__nav-badge">
+            {{ dueCount }}
+          </span>
         </RouterLink>
       </nav>
 
@@ -62,11 +72,12 @@ function confirmReset(): void {
 
       <button
         type="button"
-        class="btn btn-ghost btn-sm"
-        title="Resetar progresso"
+        class="app-header__reset"
+        title="Resetar todo o progresso"
+        aria-label="Resetar progresso"
         @click="openResetModal"
       >
-        ↺
+        🗑️
       </button>
     </div>
 
@@ -115,6 +126,9 @@ function confirmReset(): void {
 }
 
 .app-header__nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--text-muted);
   text-decoration: none;
   font-size: 0.9rem;
@@ -132,11 +146,49 @@ function confirmReset(): void {
   color: var(--primary);
 }
 
+.app-header__nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: #0f0f1a;
+  background: var(--xp-gold);
+  border-radius: 999px;
+  line-height: 1;
+}
+
 .app-header__stats {
   margin-left: auto;
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.app-header__reset {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.15s ease, background 0.15s ease;
+}
+
+.app-header__reset:hover {
+  opacity: 1;
+  background: rgba(239, 68, 68, 0.1);
 }
 
 @media (max-width: 640px) {

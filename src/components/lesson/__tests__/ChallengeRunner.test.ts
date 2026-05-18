@@ -71,7 +71,7 @@ describe('ChallengeRunner', () => {
     )
     await wrapper.find('button.btn-primary').trigger('click')
     expect(wrapper.emitted('complete')).toBeUndefined()
-    expect(wrapper.text()).toContain('Use o console!')
+    expect(wrapper.text()).toContain('Ainda não está certo.')
   })
 
   it('second correct attempt after a wrong one reports firstTry=false', async () => {

@@ -13,7 +13,7 @@ describe('useAwardActivity', () => {
     setActivePinia(createPinia())
   })
 
-  it('completeLesson (first time) triggers all 4 side effects', () => {
+  it('completeLesson registers flashcards, marks lesson, bumps streak — and awards NO XP', () => {
     const award = useAwardActivity()
     const xp = useXPStore()
     const srs = useSRSStore()
@@ -24,20 +24,18 @@ describe('useAwardActivity', () => {
 
     expect(result.awarded).toBe(true)
     expect(cp.isLessonComplete('vue', 'vue/reactivity/ref')).toBe(true)
-    expect(xp.xp).toBe(XP_REWARDS.LESSON_COMPLETE)
+    // Theory completion no longer rewards XP — only challenges do.
+    expect(xp.xp).toBe(0)
     expect(streak.streakDays).toBeGreaterThan(0)
     expect(srs.getCard('vue', 'vue/reactivity/ref/fc-1')).not.toBeNull()
   })
 
-  it('completeLesson (second time) does not re-award', () => {
+  it('completeLesson (second time) is idempotent', () => {
     const award = useAwardActivity()
-    const xp = useXPStore()
     award.completeLesson('vue', 'vue/reactivity/ref')
-    const xpAfterFirst = xp.xp
 
     const result = award.completeLesson('vue', 'vue/reactivity/ref')
     expect(result.awarded).toBe(false)
-    expect(xp.xp).toBe(xpAfterFirst) // no extra XP
   })
 
   it('completeChallenge firstTry awards CHALLENGE_FIRST_TRY', () => {

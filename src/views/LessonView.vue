@@ -22,10 +22,20 @@ const activeTab = ref<Tab>('theory')
 
 const theoryIndex = ref(0)
 
+// Transient flag — true only right after the user solves the last challenge
+// of the lesson. Drives the celebration modal so it never reappears on
+// revisits (the panel only fires once per fresh completion).
+const justCompleted = ref(false)
+
+function closeCelebrationModal(): void {
+  justCompleted.value = false
+}
+
 watch(lessonId, () => {
   activeTab.value = 'theory'
   theoryIndex.value = 0
   activeChallengeIndex.value = firstIncompleteChallengeIndex()
+  justCompleted.value = false
 })
 
 // Find where the user should resume in this lesson's challenges.
@@ -42,17 +52,31 @@ function firstIncompleteChallengeIndex(): number {
 const theory = computed(() => lesson.value?.theory ?? [])
 const challenges = computed(() => lesson.value?.challenges ?? [])
 
-const theoryComplete = computed(() =>
-  lesson.value
-    ? progress.isLessonComplete(courseId.value, lesson.value.id)
-    : false,
-)
-
 const currentTheoryBlock = computed(() => theory.value[theoryIndex.value] ?? null)
 
-const isLastTheory = computed(
-  () => theoryIndex.value === Math.max(0, theory.value.length - 1),
-)
+// Strip the longest common prefix that ends at "-" from theory tags
+// so labels stay short. Example: ['ref-value','ref-dot-value','ref-pitfall']
+// → ['value','dot-value','pitfall']. Falls back to the raw tag if stripping
+// would empty it.
+const theoryPillLabels = computed<string[]>(() => {
+  const tags = theory.value.map((b) => b.tag)
+  if (tags.length === 0) return []
+
+  let prefix = tags[0] ?? ''
+  for (let i = 1; i < tags.length; i++) {
+    const t = tags[i] ?? ''
+    let j = 0
+    while (j < prefix.length && j < t.length && prefix[j] === t[j]) j++
+    prefix = prefix.slice(0, j)
+    if (prefix.length === 0) break
+  }
+
+  const sepIndex = prefix.lastIndexOf('-')
+  const stripLen = sepIndex >= 0 ? sepIndex + 1 : 0
+  if (stripLen === 0) return tags
+
+  return tags.map((t) => t.slice(stripLen) || t)
+})
 
 function nextTheory(): void {
   if (theoryIndex.value < theory.value.length - 1) theoryIndex.value += 1
@@ -67,6 +91,12 @@ function goToTheory(idx: number): void {
 }
 
 function handleTheoryKey(event: KeyboardEvent): void {
+  // ESC closes the celebration modal from anywhere.
+  if (event.key === 'Escape' && justCompleted.value) {
+    event.preventDefault()
+    closeCelebrationModal()
+    return
+  }
   if (activeTab.value !== 'theory') return
   const target = event.target as HTMLElement | null
   // Don't hijack arrows when the user is typing in an editor or input.
@@ -84,12 +114,6 @@ function handleTheoryKey(event: KeyboardEvent): void {
 onMounted(() => window.addEventListener('keydown', handleTheoryKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', handleTheoryKey))
 
-function completeTheory(): void {
-  if (!lesson.value) return
-  award.completeLesson(courseId.value, lesson.value.id)
-  activeTab.value = 'challenges'
-}
-
 const activeChallengeIndex = ref(0)
 const activeChallenge = computed(
   () => challenges.value[activeChallengeIndex.value] ?? null,
@@ -104,6 +128,10 @@ function onChallengeComplete(payload: {
   firstTry: boolean
 }): void {
   award.completeChallenge(courseId.value, payload.challengeId, payload.firstTry)
+  if (lesson.value && allChallengesComplete.value) {
+    award.completeLesson(courseId.value, lesson.value.id)
+    justCompleted.value = true
+  }
 }
 
 const hasNextChallenge = computed(
@@ -155,7 +183,7 @@ function goToNextLesson(): void {
 }
 
 function switchTab(tab: Tab): void {
-  if (tab === 'challenges' && !theoryComplete.value && theory.value.length > 0) {
+  if (tab === 'challenges' && challenges.value.length === 0) {
     return
   }
   activeTab.value = tab
@@ -202,21 +230,12 @@ function switchTab(tab: Tab): void {
           <button
             type="button"
             class="tabs__btn"
-            :class="{
-              'tabs__btn--active': activeTab === 'challenges',
-              'tabs__btn--locked': !theoryComplete && theory.length > 0,
-            }"
+            :class="{ 'tabs__btn--active': activeTab === 'challenges' }"
             role="tab"
             :aria-selected="activeTab === 'challenges'"
-            :title="
-              !theoryComplete && theory.length > 0
-                ? 'Conclua a teoria primeiro'
-                : ''
-            "
             @click="switchTab('challenges')"
           >
             ⚔️ Challenges
-            <span v-if="!theoryComplete && theory.length > 0">🔒</span>
           </button>
         </nav>
 
@@ -236,21 +255,11 @@ function switchTab(tab: Tab): void {
                 :class="{ 'lesson-theory__pill--active': idx === theoryIndex }"
                 @click="goToTheory(idx)"
               >
-                {{ block.title }}
+                {{ theoryPillLabels[idx] }}
               </button>
             </div>
 
             <TheoryBlock :block="currentTheoryBlock" />
-
-            <div v-if="isLastTheory" class="lesson-theory__finish">
-              <button
-                type="button"
-                class="btn btn-primary"
-                @click="completeTheory"
-              >
-                {{ theoryComplete ? 'Ir para os challenges →' : 'Concluir teoria →' }}
-              </button>
-            </div>
           </template>
         </section>
 
@@ -270,34 +279,56 @@ function switchTab(tab: Tab): void {
               @next="goNext"
             />
 
-            <section v-if="allChallengesComplete" class="lesson-complete">
-              <span class="lesson-complete__icon">🎉</span>
-              <h3 class="lesson-complete__title">Lição concluída!</h3>
-              <p class="lesson-complete__message">
-                Você resolveu todos os challenges desta lição.
-              </p>
-              <div class="lesson-complete__actions">
-                <button
-                  v-if="dueCount > 0"
-                  type="button"
-                  class="btn btn-primary"
-                  @click="goToReview"
-                >
-                  Revisar {{ dueCount }} {{ dueCount === 1 ? 'card' : 'cards' }} →
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-secondary"
-                  @click="goToNextLesson"
-                >
-                  {{ nextLessonInModule ? 'Próxima lição →' : '← Voltar aos módulos' }}
-                </button>
-              </div>
-            </section>
           </template>
         </section>
       </template>
     </div>
+
+    <Transition name="celebration">
+      <div
+        v-if="justCompleted"
+        class="celebration"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="celebration-title"
+      >
+        <div class="celebration__backdrop" @click="closeCelebrationModal" />
+        <div class="celebration__panel">
+          <button
+            type="button"
+            class="celebration__close"
+            aria-label="Fechar"
+            @click="closeCelebrationModal"
+          >
+            ×
+          </button>
+          <span class="celebration__icon" aria-hidden="true">🎉</span>
+          <h2 id="celebration-title" class="celebration__title">
+            Parabéns!
+          </h2>
+          <p class="celebration__message">
+            Você resolveu todos os challenges desta lição.
+          </p>
+          <div class="celebration__actions">
+            <button
+              v-if="dueCount > 0"
+              type="button"
+              class="btn btn-primary"
+              @click="goToReview"
+            >
+              Revisar
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="goToNextLesson"
+            >
+              {{ nextLessonInModule ? 'Próxima lição' : 'Voltar aos módulos' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -345,18 +376,13 @@ function switchTab(tab: Tab): void {
   transition: color 0.2s, border-color 0.2s;
 }
 
-.tabs__btn:hover:not(.tabs__btn--locked) {
+.tabs__btn:hover {
   color: var(--text);
 }
 
 .tabs__btn--active {
   color: var(--primary);
   border-bottom-color: var(--primary);
-}
-
-.tabs__btn--locked {
-  cursor: not-allowed;
-  opacity: 0.6;
 }
 
 .lesson-theory__pills {
@@ -391,12 +417,6 @@ function switchTab(tab: Tab): void {
   background: rgba(66, 184, 131, 0.1);
 }
 
-.lesson-theory__finish {
-  display: flex;
-  justify-content: center;
-  margin-top: 1.5rem;
-}
-
 .lesson-challenges__progress {
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -404,40 +424,116 @@ function switchTab(tab: Tab): void {
   margin-bottom: 0.75rem;
 }
 
-.lesson-complete {
-  margin-top: 1.5rem;
-  padding: 1.5rem;
+.celebration {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.celebration__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(3px);
+}
+
+.celebration__panel {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
   background: linear-gradient(135deg, var(--bg-card), var(--bg-card-2));
   border: 1px solid rgba(66, 184, 131, 0.4);
   border-radius: var(--radius);
+  box-shadow: var(--shadow), 0 0 60px rgba(66, 184, 131, 0.15);
+  padding: 2.25rem 1.75rem 1.75rem;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  animation: fadeIn 0.4s ease;
+  gap: 0.6rem;
 }
 
-.lesson-complete__icon {
-  font-size: 2.25rem;
+.celebration__close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.7rem;
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
-.lesson-complete__title {
+.celebration__close:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.celebration__icon {
+  font-size: 3rem;
+  animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.celebration__title {
   margin: 0;
   color: var(--primary);
+  font-size: 1.5rem;
 }
 
-.lesson-complete__message {
+.celebration__message {
   margin: 0;
   color: var(--text-muted);
 }
 
-.lesson-complete__actions {
-  margin-top: 0.75rem;
+.celebration__actions {
+  margin-top: 1rem;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.6rem;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.celebration-enter-active,
+.celebration-leave-active {
+  transition: opacity 0.25s ease;
+}
+.celebration-enter-active .celebration__panel,
+.celebration-leave-active .celebration__panel {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.celebration-enter-from,
+.celebration-leave-to {
+  opacity: 0;
+}
+.celebration-enter-from .celebration__panel,
+.celebration-leave-to .celebration__panel {
+  transform: translateY(10px) scale(0.96);
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
 }
 
 .empty-state,
