@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import XPBar from '@/components/game/XPBar.vue'
 import StreakBadge from '@/components/game/StreakBadge.vue'
+import ConfirmModal from '@/components/ui/ConfirmModal.vue'
 import { useXPStore } from '@/stores/xp'
 import { useStreakStore } from '@/stores/streak'
 import { useLevelUpStore } from '@/stores/levelUp'
@@ -20,14 +21,13 @@ const reviewPath = computed(() =>
   currentCourseId.value ? `/course/${currentCourseId.value}/review` : null,
 )
 
-function handleReset(): void {
-  if (
-    !window.confirm(
-      'Resetar todo o progresso (XP, streak, lições, challenges e flashcards)? Esta ação não pode ser desfeita.',
-    )
-  ) {
-    return
-  }
+const showResetModal = ref(false)
+
+function openResetModal(): void {
+  showResetModal.value = true
+}
+
+function confirmReset(): void {
   useXPStore().reset()
   useStreakStore().reset()
   useLevelUpStore().reset()
@@ -64,11 +64,21 @@ function handleReset(): void {
         type="button"
         class="btn btn-ghost btn-sm"
         title="Resetar progresso"
-        @click="handleReset"
+        @click="openResetModal"
       >
         ↺
       </button>
     </div>
+
+    <ConfirmModal
+      v-model:open="showResetModal"
+      title="Resetar progresso?"
+      message="Isso vai apagar XP, streak, lições e challenges completados, e flashcards. Esta ação não pode ser desfeita."
+      confirm-text="Resetar tudo"
+      cancel-text="Cancelar"
+      danger
+      @confirm="confirmReset"
+    />
   </header>
 </template>
 
