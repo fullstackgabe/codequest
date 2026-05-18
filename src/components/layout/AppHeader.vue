@@ -6,6 +6,8 @@ import StreakBadge from '@/components/game/StreakBadge.vue'
 import { useXPStore } from '@/stores/xp'
 import { useStreakStore } from '@/stores/streak'
 import { useLevelUpStore } from '@/stores/levelUp'
+import { useCourseProgressStore } from '@/stores/courseProgress'
+import { useSRSStore } from '@/stores/srs'
 
 const route = useRoute()
 
@@ -19,13 +21,18 @@ const reviewPath = computed(() =>
 )
 
 function handleReset(): void {
-  // Native confirm is fine for v1 (see design AD): no custom modal needed.
-  if (!window.confirm('Resetar todo o progresso (XP, streak)? Esta ação não pode ser desfeita.')) {
+  if (
+    !window.confirm(
+      'Resetar todo o progresso (XP, streak, lições, challenges e flashcards)? Esta ação não pode ser desfeita.',
+    )
+  ) {
     return
   }
   useXPStore().reset()
   useStreakStore().reset()
   useLevelUpStore().reset()
+  useCourseProgressStore().reset()
+  useSRSStore().reset()
   window.location.reload()
 }
 </script>
