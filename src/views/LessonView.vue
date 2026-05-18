@@ -3,6 +3,7 @@ import { computed, ref, toRef, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useLesson } from '@/composables/useLesson'
 import { useCourseProgressStore } from '@/stores/courseProgress'
+import { useSRSStore } from '@/stores/srs'
 import { useAwardActivity } from '@/composables/useAwardActivity'
 import TheoryBlock from '@/components/lesson/TheoryBlock.vue'
 import ChallengeRunner from '@/components/lesson/ChallengeRunner.vue'
@@ -24,7 +25,19 @@ const theoryIndex = ref(0)
 watch(lessonId, () => {
   activeTab.value = 'theory'
   theoryIndex.value = 0
+  activeChallengeIndex.value = firstIncompleteChallengeIndex()
 })
+
+// Find where the user should resume in this lesson's challenges.
+// First unfinished one; if all are done, point at the last (so the celebration shows).
+function firstIncompleteChallengeIndex(): number {
+  const list = challenges.value
+  for (let i = 0; i < list.length; i++) {
+    const c = list[i]
+    if (c && !progress.isChallengeComplete(courseId.value, c.id)) return i
+  }
+  return Math.max(0, list.length - 1)
+}
 
 const theory = computed(() => lesson.value?.theory ?? [])
 const challenges = computed(() => lesson.value?.challenges ?? [])
@@ -71,10 +84,6 @@ function onChallengeComplete(payload: {
   award.completeChallenge(courseId.value, payload.challengeId, payload.firstTry)
 }
 
-function selectChallenge(idx: number): void {
-  activeChallengeIndex.value = idx
-}
-
 const hasNextChallenge = computed(
   () => activeChallengeIndex.value < challenges.value.length - 1,
 )
@@ -88,29 +97,39 @@ const nextLessonInModule = computed(() => {
   return mod.lessons[idx + 1] ?? null
 })
 
-const isEndOfModule = computed(
-  () => !hasNextChallenge.value && nextLessonInModule.value === null,
+// Inside the lesson, only "Próximo challenge →" advances. End-of-lesson navigation
+// (review, next lesson, back to modules) lives in the completion panel below.
+const nextLabel = computed<string | null>(() =>
+  hasNextChallenge.value ? 'Próximo challenge →' : null,
 )
-
-const nextLabel = computed<string | null>(() => {
-  if (hasNextChallenge.value) return 'Próximo challenge →'
-  if (nextLessonInModule.value) return 'Próxima lição →'
-  if (isEndOfModule.value) return '← Voltar aos módulos'
-  return null
-})
 
 function goNext(): void {
   if (hasNextChallenge.value) {
     activeChallengeIndex.value += 1
-    return
   }
+}
+
+// Lesson is "done" once every challenge has been completed.
+const allChallengesComplete = computed(() => {
+  const list = challenges.value
+  if (list.length === 0) return false
+  return list.every((c) => progress.isChallengeComplete(courseId.value, c.id))
+})
+
+const srs = useSRSStore()
+const dueCount = computed(() => srs.dueCount(courseId.value))
+
+function goToReview(): void {
+  router.push(`/course/${courseId.value}/review`)
+}
+
+function goToNextLesson(): void {
   const next = nextLessonInModule.value
   if (next) {
     router.push(`/course/${courseId.value}/lesson/${next.id}`)
-    return
+  } else {
+    router.push(`/course/${courseId.value}`)
   }
-  // End of module — back to the modules list (CourseView).
-  router.push(`/course/${courseId.value}`)
 }
 
 function switchTab(tab: Tab): void {
@@ -223,21 +242,8 @@ function switchTab(tab: Tab): void {
             Não há desafios nesta lição.
           </div>
           <template v-else-if="activeChallenge">
-            <div class="lesson-challenges__nav">
-              <button
-                v-for="(ch, idx) in challenges"
-                :key="ch.id"
-                type="button"
-                class="lesson-challenges__chip"
-                :class="{
-                  'lesson-challenges__chip--active': idx === activeChallengeIndex,
-                  'lesson-challenges__chip--complete': isChallengeComplete(ch.id),
-                }"
-                @click="selectChallenge(idx)"
-              >
-                {{ idx + 1 }}
-                <span v-if="isChallengeComplete(ch.id)">✓</span>
-              </button>
+            <div class="lesson-challenges__progress">
+              Challenge {{ activeChallengeIndex + 1 }} de {{ challenges.length }}
             </div>
             <ChallengeRunner
               :challenge="activeChallenge"
@@ -246,6 +252,31 @@ function switchTab(tab: Tab): void {
               @complete="onChallengeComplete"
               @next="goNext"
             />
+
+            <section v-if="allChallengesComplete" class="lesson-complete">
+              <span class="lesson-complete__icon">🎉</span>
+              <h3 class="lesson-complete__title">Lição concluída!</h3>
+              <p class="lesson-complete__message">
+                Você resolveu todos os challenges desta lição.
+              </p>
+              <div class="lesson-complete__actions">
+                <button
+                  v-if="dueCount > 0"
+                  type="button"
+                  class="btn btn-primary"
+                  @click="goToReview"
+                >
+                  Revisar {{ dueCount }} {{ dueCount === 1 ? 'card' : 'cards' }} →
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  @click="goToNextLesson"
+                >
+                  {{ nextLessonInModule ? 'Próxima lição →' : '← Voltar aos módulos' }}
+                </button>
+              </div>
+            </section>
           </template>
         </section>
       </template>
@@ -325,38 +356,47 @@ function switchTab(tab: Tab): void {
   margin-right: auto;
 }
 
-.lesson-challenges__nav {
+.lesson-challenges__progress {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 0.75rem;
+}
+
+.lesson-complete {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--bg-card), var(--bg-card-2));
+  border: 1px solid rgba(66, 184, 131, 0.4);
+  border-radius: var(--radius);
+  text-align: center;
   display: flex;
-  gap: 0.4rem;
-  margin-bottom: 1rem;
-}
-
-.lesson-challenges__chip {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font: inherit;
-  padding: 0.3rem 0.75rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  display: inline-flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  animation: fadeIn 0.4s ease;
 }
 
-.lesson-challenges__chip:hover {
-  border-color: var(--primary);
-  color: var(--text);
+.lesson-complete__icon {
+  font-size: 2.25rem;
 }
 
-.lesson-challenges__chip--active {
-  border-color: var(--primary);
+.lesson-complete__title {
+  margin: 0;
   color: var(--primary);
 }
 
-.lesson-challenges__chip--complete {
-  border-color: var(--success);
-  color: var(--success);
+.lesson-complete__message {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.lesson-complete__actions {
+  margin-top: 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .empty-state,
