@@ -1,4 +1,5 @@
 import type { Course } from '@/types/course'
+import { VUE_SVG } from '../brandIcons'
 
 // Reactivity
 import refLesson from './lessons/reactivity-ref'
@@ -37,7 +38,7 @@ const vueCourse: Course = {
   id: 'vue',
   title: 'Vue.js',
   description: 'Vue 3 essentials — reactivity, directives, components, Pinia e ciclo de vida.',
-  icon: '🟢',
+  icon: VUE_SVG,
   color: '#42b883',
   docUrl: 'https://vuejs.org/guide/',
   modules: [

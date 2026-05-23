@@ -23,7 +23,9 @@ describe('CourseCard', () => {
   it('renders title, icon and "Começar" CTA when no progress', () => {
     const wrapper = mountCard()
     expect(wrapper.text()).toContain('Vue.js')
-    expect(wrapper.text()).toContain('🟢')
+    // Icon is now an inline brand SVG rendered via v-html, so it lives in
+    // wrapper.html() (not .text()).
+    expect(wrapper.html()).toContain('<svg')
     expect(wrapper.text()).toMatch(/0%/)
     expect(wrapper.text()).toMatch(/0\/\d+ lições/)
     expect(wrapper.text()).toContain('Começar')

@@ -6,6 +6,7 @@ import { useUnlockMap } from '@/composables/useUnlockMap'
 import { useCourseProgressStore } from '@/stores/courseProgress'
 import { useSRSStore } from '@/stores/srs'
 import ModuleCard from '@/components/course/ModuleCard.vue'
+import CourseIcon from '@/components/course/CourseIcon.vue'
 import type { Module } from '@/types/module'
 
 const route = useRoute()
@@ -42,9 +43,11 @@ const unlockedIndices = useUnlockMap<Module>(modulesRef, (mod) =>
         <header class="course-header">
           <RouterLink to="/" class="course-header__back">← Hub</RouterLink>
           <div class="course-header__title">
-            <span class="course-header__icon" :style="{ color: course.color }">
-              {{ course.icon }}
-            </span>
+            <CourseIcon
+              :icon="course.icon"
+              :color="course.color"
+              class="course-header__icon"
+            />
             <h1>{{ course.title }}</h1>
           </div>
           <p class="course-header__description">{{ course.description }}</p>
