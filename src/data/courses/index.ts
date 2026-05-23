@@ -8,11 +8,20 @@ import vueCourse from './vue'
 import nodeCourse from './node'
 import typescriptCourse from './typescript'
 import laravelCourse from './laravel'
+import awsCourse from './aws'
+import boasPraticasCourse from './boas-praticas'
 
 // Adding a new course:
 // 1. Create src/data/courses/<id>/index.ts that default-exports a `Course`
 // 2. Add an import here and append to `courses` below
-const courses: Course[] = [vueCourse, nodeCourse, typescriptCourse, laravelCourse]
+const courses: Course[] = [
+  vueCourse,
+  nodeCourse,
+  typescriptCourse,
+  laravelCourse,
+  awsCourse,
+  boasPraticasCourse,
+]
 
 // Warn (DEV only) about duplicate course IDs — first registration wins.
 if (import.meta.env?.DEV) {
